@@ -28,11 +28,12 @@ def train(args):
     train_file, eval_file = args.train_file, args.eval_file
     out_dir_path = args.output_folder
     mkdir(out_dir_path)
+    gene_name = args.gene_name
     local_rank, device = init_dist()
     logger = get_logger(os.path.join(out_dir_path, 'exp.log'))
 
-    train_set = Dataset(train_file, is_train=True)
-    test_set = Dataset(eval_file, is_train=True)
+    train_set = Dataset(train_file, gene_name, is_train=True)
+    test_set = Dataset(eval_file, gene_name, is_train=True)
     data_sampler = DistributedSampler(train_set)
     data_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, sampler=data_sampler)
     test_data_sampler = DistributedSampler(test_set)
@@ -139,6 +140,7 @@ if __name__ == '__main__':
     req_args.add_argument('-t', dest='train_file', help='', required=True)
     req_args.add_argument('-e', dest='eval_file', help='', required=True)
     req_args.add_argument('-o', dest='output_folder', help='', required=True)
+    req_args.add_argument('-g', dest='gene_name', help='', required=True)
     req_args.add_argument('--local_rank', type=int, default=0)
 
     args = parser.parse_args(sys.argv[1:])

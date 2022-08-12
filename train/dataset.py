@@ -11,16 +11,16 @@ class Dataset(data.Dataset):
     '''
     Reading the training single-cell hic dataset
     '''
-    def __init__(self, file_path, is_train=False):
+    def __init__(self, file_path, gene_name, is_train=False):
         super(Dataset, self).__init__()
 
         self.is_train = is_train
-        self._get_data(file_path)
+        self._get_data(file_path, gene_name)
         
         logger = logging.getLogger('base')
         logger.info('Dataset is created.')
 
-    def _get_data(self, file_path):
+    def _get_data(self, file_path, gene_name):
         '''
         [
             {
@@ -50,7 +50,7 @@ class Dataset(data.Dataset):
         self._scRNA_data, self._scHiC_data = [], []
         # scHiC_head = None
         for _data in _datas:
-            _scHiC_data = mat2array(_data['scHiC']['ABCB1'])
+            _scHiC_data = mat2array(_data['scHiC'][gene_name])
             # _scHiC_data = np.log1p(_scHiC_data)
             if np.all(_scHiC_data == 0):
                 continue

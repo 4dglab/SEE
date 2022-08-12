@@ -12,8 +12,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 parser = argparse.ArgumentParser(description="Evaluation Script")
 parser.add_argument("--data_file", default="/home/micl/workspace/lmh_data/sclab/eval_dataset.npy", type=str)
-parser.add_argument("--model", default="/home/micl/workspace/lmh_data/sclab/tmp/model_epoch_10.pth", type=str, help="model path")
-parser.add_argument("--results", default="/home/micl/workspace/lmh_data/sclab/tmp", type=str, help="Result save location")
+parser.add_argument("--model", default="/home/micl/workspace/lmh_data/sclab/tmp/PDGFRA/model_epoch_6.pth", type=str, help="model path")
+parser.add_argument("--results", default="/home/micl/workspace/lmh_data/sclab/tmp/PDGFRA", type=str, help="Result save location")
 opt = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
