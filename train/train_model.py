@@ -24,13 +24,10 @@ def get_corr(fake_Y, Y):
     return corr
 
 
-def train(args):
-    train_file, eval_file = args.train_file, args.eval_file
-    out_dir_path = args.output_folder
-    mkdir(out_dir_path)
-    gene_name = args.gene_name
+def train(train_file, eval_file, output_folder, gene_name):
+    mkdir(output_folder)
     local_rank, device = init_dist()
-    logger = get_logger(os.path.join(out_dir_path, 'exp.log'))
+    logger = get_logger(os.path.join(output_folder, 'exp.log'))
 
     train_set = Dataset(train_file, gene_name, is_train=True)
     test_set = Dataset(eval_file, gene_name, is_train=True)
@@ -123,7 +120,7 @@ def train(args):
                 epoch, running_loss/len(data_loader), test_loss / len(test_data_loader), test_accuracy / len(test_data_loader))
             logger.info(log_str)
 
-            save_checkpoint(Net, epoch, out_dir_path)
+            save_checkpoint(Net, epoch, output_folder)
         dist.barrier()
 
 
@@ -144,4 +141,4 @@ if __name__ == '__main__':
     req_args.add_argument('--local_rank', type=int, default=0)
 
     args = parser.parse_args(sys.argv[1:])
-    train(args)
+    train(args.train_file, args.eval_file, args.output_folder, args.gene_name)
