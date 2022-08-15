@@ -16,7 +16,6 @@ cools_path = '/home/micl/workspace/lmh_data/Lee2019/Human_single_cell_10kb_cool'
 hic = anndata.read_h5ad("/home/micl/workspace/lmh_data/sclab/hic_result.h5ad")
 # rna
 rna = anndata.read_h5ad("/home/micl/workspace/lmh_data/sclab/rna_result.h5ad")
-rna = rna[map_info.index, :]
 
 rna_marker_gene = pd.read_csv('/home/micl/workspace/lmh_data/sclab/rna_marker_gene.csv', sep='\t', index_col=0)
 _tmp = rna.var.loc[rna_marker_gene.index]
@@ -24,9 +23,7 @@ _tmp = _tmp[_tmp['chromEnd'] > _tmp['chromStart'] + 50000]
 rna_marker_gene = rna_marker_gene.loc[_tmp.index]
 
 threads = 16
-
-def mat2array(mat):
-    return mat[np.triu_indices_from(mat, k=0)]
+random.seed(0)
 
 def get_cooler(hic_name):
     file_name = '{}_10kb_contacts.cool'.format(hic_name)
@@ -43,6 +40,9 @@ def catch_matrix(_c, chrom: str, start: int, end: int, strand: str):
     # contact = _c.matrix(balance=False, as_pixels=True, join=True).fetch('{}:{}-{}'.format(chrom, start, end))
     mat = _c.matrix(balance=False).fetch('{}:{}-{}'.format(chrom, start, end))
     return mat
+
+def mat2array(mat):
+    return mat[np.triu_indices_from(mat, k=0)]
 
 def catch_location(_args):
     hic_name, gene_name = _args
@@ -61,6 +61,13 @@ def catch_locations(hic_names, gene_names):
     return _contacts
 contacts = catch_locations(hic.obs_names, rna_marker_gene.index.tolist())
 
+def get_corr_matrix(_contacts, _rna):
+    _hic = _contacts[_contacts.columns].values
+    _hic = np.array([np.concatenate(i, axis=0) for i in _hic])
+    _hic = pd.DataFrame(data=_hic.T, columns=_contacts.index)
+    _rna = pd.DataFrame(data=_rna.X.T, columns=_rna.obs_names)
+    return _hic.corr(), _rna.corr()
+hic_corr, rna_corr = get_corr_matrix(contacts, rna)
 
 _dataset = []
 for scRNA, row in tqdm(map_info.iterrows(), total = map_info.shape[0]):
@@ -68,15 +75,40 @@ for scRNA, row in tqdm(map_info.iterrows(), total = map_info.shape[0]):
         'scRNA': rna[scRNA, :].layers["counts"][0].astype(np.int32),
         'scRNA_head': rna.var_names,
         'scHiC': contacts.loc[row['scHiC']].to_dict(),
-        'cell_type': row['cell_type']
+        'cell_type': row['cell_type'],
+        'identity': 'truth',
     })
 
-# fake_dataset = []
-# for _gene in rna_marker_gene.index:
+def find_best_RNA(_name):
+    best_rna_names = rna_corr.loc[_name].nlargest().index
+    _data = np.array(rna[best_rna_names].layers["counts"].mean(axis=0)).astype(np.int32)
+    return _data
+
+def find_best_HiC(_name):
+    best_hic_names = hic_corr.loc[_name].nlargest().index
+    _data = {}
+    for column, row in contacts.loc[best_hic_names].iteritems():
+        _data[column] = np.ceil(np.vstack(row.values).mean(axis=0)).astype(np.int16)
+    _data = pd.DataFrame([_data])
+    return _data
+
+cell_type_count = map_info.groupby('cell_type').count()
+for cell_type, row in cell_type_count.iterrows():
+    for i in range(cell_type_count.max()[0] - row['scHiC']):
+        random_index = random.randint(0, row['scHiC'] - 1)
+        _case = map_info[map_info['cell_type']==cell_type].iloc[random_index]
+        best_rna, best_hic = find_best_RNA(_case.name), find_best_HiC(_case['scHiC'])
+        
+        _dataset.append({
+            'scRNA': best_rna,
+            'scRNA_head': rna.var_names,
+            'scHiC': best_hic.to_dict(),
+            'cell_type': cell_type,
+            'identity': 'fake',
+        })
 
 
 # Randomly generate train dataset and test dataset
-random.seed(0)
 _indexs = random.sample(range(0, len(_dataset)), int(len(_dataset)*0.1))
 eval_dataset = [_dataset[_index] for _index in _indexs]
 _indexs = list(set(range(0, len(_dataset))) - set(_indexs))

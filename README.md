@@ -1,5 +1,5 @@
 conda create -n sclab python=3.8
-conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
+conda install pytorch cudatoolkit=11.3 -c pytorch
 pip install scglue
 <!-- conda install -c conda-forge -c bioconda scglue pytorch-gpu  # With GPU support -->
 
@@ -9,3 +9,5 @@ pip install protobuf==3.20.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
 conda install -c pytorch faiss-gpu
 <!-- pip install ipykernel -->
 <!-- conda install -c conda-forge ipywidgets -->
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /home/micl/workspace/lmh_data/sclab/train_dataset.npy -e /home/micl/workspace/lmh_data/sclab/eval_dataset.npy -o /home/micl/workspace/lmh_data/sclab/tmp/PDGFRA
