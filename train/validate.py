@@ -16,8 +16,10 @@ def evaluate(eval_file, model_file, gene_name, output_file):
 
     input_size, output_size = tuple(eval_set[0][0].shape), eval_set[0][1].shape[0]
     patch_size = tuple([int(i / 8) for i in input_size])
-    model = define_network(input_size, patch_size, output_size)
+    model = torch.nn.DataParallel(define_network(input_size, patch_size, output_size))
     model.load_state_dict(torch.load(model_file))
+    model.cuda()
+    model.eval()
 
     output_data = []
     for _, batch in enumerate(data_loader, 1):

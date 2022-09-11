@@ -8,6 +8,7 @@ from torch.autograd import Variable
 from torch.utils.data.distributed import DistributedSampler
 
 from dataset import Dataset
+from focalloss import FocalLoss
 from net import define_network
 from util import mkdir, get_logger, init_dist, reduce_tensor
 
@@ -46,9 +47,10 @@ def train(train_file, eval_file, output_folder, gene_name):
     Net = torch.nn.parallel.DistributedDataParallel(Net, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
     scaler = torch.cuda.amp.GradScaler()
 
-    _loss = torch.nn.MSELoss(reduction='mean').to(device)
+    # _loss = torch.nn.MSELoss(reduction='mean').to(device)
+    _loss = FocalLoss().to(device)
 
-    for epoch in range(0, 100):
+    for epoch in range(0, 30):
         running_loss = 0.0
         Net.train()
         output_max = 0.0
@@ -62,10 +64,13 @@ def train(train_file, eval_file, output_folder, gene_name):
 
             optimizer.zero_grad()
             # mask_is_0, mask_is_not_0 = mask==0, mask!=0
-            # target_is_0, target_is_not_0 = target==0, target!=0
+            target_is_0, target_is_not_0 = target==0, target!=0
+            mask = target_is_not_0.sum(axis=0)!=0
             with torch.cuda.amp.autocast():
                 output = Net(input) * 10
-                # output[mask_is_0] = target[mask_is_0] = 0
+                # _output, _target = output.clone().detach(), target.clone().detach()
+                # _output[target_is_0], _target[target_is_0] = 0, 0
+                # loss1 = _loss(output[:, :, mask[0]], target[:, :, mask[0]])
                 loss1 = _loss(output, target)
                 output_max = max(output_max, output.max().item())
 
@@ -97,10 +102,13 @@ def train(train_file, eval_file, output_folder, gene_name):
                 # mask = Variable(batch[2]).to(device).unsqueeze(1)
                 
                 # mask_is_0, mask_is_not_0 = mask==0, mask!=0
-                # target_is_0, target_is_not_0 = target==0, target!=0
+                target_is_0, target_is_not_0 = target==0, target!=0
+                mask = target_is_not_0.sum(axis=0)!=0
                 with torch.cuda.amp.autocast():
                     output = Net(input) * 10
-                    # output[mask_is_0] = target[mask_is_0] = 0
+                    # _output, _target = output.clone().detach(), target.clone().detach()
+                    # _output[target_is_0], _target[target_is_0] = 0, 0
+                    # loss1 = _loss(output[:, :, mask[0]], target[:, :, mask[0]])
                     loss1 = _loss(output, target)
                     _accuracy = 0
                     for _batch in range(output.shape[0]):

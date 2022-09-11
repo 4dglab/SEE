@@ -1,13 +1,12 @@
 conda create -n sclab python=3.8
 conda install pytorch cudatoolkit=11.3 -c pytorch
 pip install scglue
-<!-- conda install -c conda-forge -c bioconda scglue pytorch-gpu  # With GPU support -->
-
 pip install cooler
-pip install --user scikit-misc
-pip install protobuf==3.20.1 -i https://pypi.tuna.tsinghua.edu.cn/simple
-conda install -c pytorch faiss-gpu
-<!-- pip install ipykernel -->
-<!-- conda install -c conda-forge ipywidgets -->
+pip install einops
+pip install vit-pytorch
 
-CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /home/micl/workspace/lmh_data/sclab/train_dataset.npy -e /home/micl/workspace/lmh_data/sclab/eval_dataset.npy -o /home/micl/workspace/lmh_data/sclab/tmp/PDGFRA
+CUDA_VISIBLE_DEVICES=0,1 python -m torch.distributed.launch --nproc_per_node=2 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/PDGFRA -g PDGFRA
+
+# pip install --upgrade jupyter
+# python -m ipykernel install --user --name sclab
+# pyBigWig

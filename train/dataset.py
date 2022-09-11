@@ -48,7 +48,7 @@ class Dataset(data.Dataset):
             _scHiC_data = _data['scHiC'][gene_name]
             if np.all(_scHiC_data == 0):
                 continue
-            self._scHiC_data.append(_scHiC_data)
+            self._scHiC_data.append(_scHiC_data.tolist())
 
             _len = int(_data['scRNA'].shape[0] / 64)
             _input_size = tuple([ i * 8 for i in _crack(_len)])

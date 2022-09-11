@@ -8,22 +8,21 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+root_dir = '/lmh_data/data/sclab'
+threads = 8
+random.seed(0)
 
-map_info = pd.read_csv('/home/micl/workspace/lmh_data/sclab/map_result.csv', sep='\t', index_col=0)
-
+map_info = pd.read_csv(os.path.join(root_dir, 'sclab', 'map_result.csv'), sep='\t', index_col=0)
 # hic
-cools_path = '/home/micl/workspace/lmh_data/Lee2019/Human_single_cell_10kb_cool'
-hic = anndata.read_h5ad("/home/micl/workspace/lmh_data/sclab/hic_result.h5ad")
+cools_path = os.path.join(root_dir, 'Lee2019', 'Human_single_cell_10kb_cool')
+hic = anndata.read_h5ad(os.path.join(root_dir, 'sclab', 'hic_result.h5ad'))
 # rna
-rna = anndata.read_h5ad("/home/micl/workspace/lmh_data/sclab/rna_result.h5ad")
-
-rna_marker_gene = pd.read_csv('/home/micl/workspace/lmh_data/sclab/rna_marker_gene.csv', sep='\t', index_col=0)
+rna = anndata.read_h5ad(os.path.join(root_dir, 'sclab', 'rna_result.h5ad'))
+rna_marker_gene = pd.read_csv(os.path.join(root_dir, 'sclab', 'rna_marker_gene.csv'), sep='\t', index_col=0)
 _tmp = rna.var.loc[rna_marker_gene.index]
 _tmp = _tmp[_tmp['chromEnd'] > _tmp['chromStart'] + 50000]
 rna_marker_gene = rna_marker_gene.loc[_tmp.index]
 
-threads = 16
-random.seed(0)
 
 def get_cooler(hic_name):
     file_name = '{}_10kb_contacts.cool'.format(hic_name)
@@ -61,14 +60,6 @@ def catch_locations(hic_names, gene_names):
     return _contacts
 contacts = catch_locations(hic.obs_names, rna_marker_gene.index.tolist())
 
-def get_corr_matrix(_contacts, _rna):
-    _hic = _contacts[_contacts.columns].values
-    _hic = np.array([np.concatenate(i, axis=0) for i in _hic])
-    _hic = pd.DataFrame(data=_hic.T, columns=_contacts.index)
-    _rna = pd.DataFrame(data=_rna.X.T, columns=_rna.obs_names)
-    return _hic.corr(), _rna.corr()
-hic_corr, rna_corr = get_corr_matrix(contacts, rna)
-
 _dataset = []
 for scRNA, row in tqdm(map_info.iterrows(), total = map_info.shape[0]):
     _dataset.append({
@@ -79,13 +70,28 @@ for scRNA, row in tqdm(map_info.iterrows(), total = map_info.shape[0]):
         'identity': 'truth',
     })
 
-def find_best_RNA(_name):
-    best_rna_names = rna_corr.loc[_name].nlargest().index
+def get_corr_matrix():
+    hic_corr, rna_corr = dict(), dict()
+    for cell_type in map_info['cell_type'].unique():
+        _hic_names = hic[hic.obs['cell_type']==cell_type].obs_names
+        _rna_names = rna[rna.obs['cell_type']==cell_type].obs_names
+
+        _contacts = contacts.loc[_hic_names]
+        _hic = np.array([np.concatenate(i, axis=0) for i in _contacts.values])
+        _hic = pd.DataFrame(data=_hic.T, columns=_contacts.index)
+        _rna = pd.DataFrame(data=rna[_rna_names].X.T, columns=rna[_rna_names].obs_names)
+
+        hic_corr[cell_type], rna_corr[cell_type] = _hic.corr(), _rna.corr()
+    return hic_corr, rna_corr
+hic_corr, rna_corr = get_corr_matrix()
+
+def find_best_RNA(_name, cell_type):
+    best_rna_names = rna_corr[cell_type].loc[_name].nlargest().index
     _data = np.array(rna[best_rna_names].layers["counts"].mean(axis=0)).astype(np.int32)
     return _data
 
-def find_best_HiC(_name):
-    best_hic_names = hic_corr.loc[_name].nlargest().index
+def find_best_HiC(_name, cell_type):
+    best_hic_names = hic_corr[cell_type].loc[_name].nlargest().index
     _data = {}
     for column, row in contacts.loc[best_hic_names].iteritems():
         _data[column] = np.ceil(np.vstack(row.values).mean(axis=0)).astype(np.int16)
@@ -94,15 +100,15 @@ def find_best_HiC(_name):
 
 cell_type_count = map_info.groupby('cell_type').count()
 for cell_type, row in cell_type_count.iterrows():
-    for i in range(cell_type_count.max()[0] - row['scHiC']):
+    for i in range(min(cell_type_count.max()[0] - row['scHiC'], int(row['scHiC']/2))):
         random_index = random.randint(0, row['scHiC'] - 1)
         _case = map_info[map_info['cell_type']==cell_type].iloc[random_index]
-        best_rna, best_hic = find_best_RNA(_case.name), find_best_HiC(_case['scHiC'])
+        best_rna, best_hic = find_best_RNA(_case.name, cell_type), find_best_HiC(_case['scHiC'], cell_type)
         
         _dataset.append({
             'scRNA': best_rna,
             'scRNA_head': rna.var_names,
-            'scHiC': best_hic.to_dict(),
+            'scHiC': best_hic.loc[0].to_dict(),
             'cell_type': cell_type,
             'identity': 'fake',
         })
@@ -114,5 +120,5 @@ eval_dataset = [_dataset[_index] for _index in _indexs]
 _indexs = list(set(range(0, len(_dataset))) - set(_indexs))
 train_dataset = [_dataset[_index] for _index in _indexs]
 
-np.save('/home/micl/workspace/lmh_data/sclab/train_dataset.npy', train_dataset)
-np.save('/home/micl/workspace/lmh_data/sclab/eval_dataset.npy', eval_dataset)
+np.save(os.path.join(root_dir, 'sclab', 'train_dataset.npy'), train_dataset)
+np.save(os.path.join(root_dir, 'sclab', 'eval_dataset.npy'), eval_dataset)
