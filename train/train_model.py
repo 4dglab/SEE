@@ -50,7 +50,7 @@ def train(train_file, eval_file, output_folder, gene_name):
     # _loss = torch.nn.MSELoss(reduction='mean').to(device)
     _loss = FocalLoss().to(device)
 
-    for epoch in range(0, 30):
+    for epoch in range(0, 15):
         running_loss = 0.0
         Net.train()
         output_max = 0.0
@@ -60,17 +60,10 @@ def train(train_file, eval_file, output_folder, gene_name):
         for iteration, batch in enumerate(data_loader, 1):
             input = Variable(batch[0]).to(device).unsqueeze(1)
             target = Variable(batch[1]).to(device).unsqueeze(1)
-            # mask = Variable(batch[2]).to(device).unsqueeze(1)
 
             optimizer.zero_grad()
-            # mask_is_0, mask_is_not_0 = mask==0, mask!=0
-            target_is_0, target_is_not_0 = target==0, target!=0
-            mask = target_is_not_0.sum(axis=0)!=0
             with torch.cuda.amp.autocast():
                 output = Net(input) * 10
-                # _output, _target = output.clone().detach(), target.clone().detach()
-                # _output[target_is_0], _target[target_is_0] = 0, 0
-                # loss1 = _loss(output[:, :, mask[0]], target[:, :, mask[0]])
                 loss1 = _loss(output, target)
                 output_max = max(output_max, output.max().item())
 
@@ -92,23 +85,16 @@ def train(train_file, eval_file, output_folder, gene_name):
         if local_rank == 0:
             logger.info(str(output_max))
 
-        # 测试
+        # test
         test_loss, test_accuracy = 0.0, 0.0
         Net.eval()
         with torch.no_grad():
             for iteration, batch in enumerate(test_data_loader, 1):
                 input = Variable(batch[0]).to(device).unsqueeze(1)
                 target = Variable(batch[1]).to(device).unsqueeze(1)
-                # mask = Variable(batch[2]).to(device).unsqueeze(1)
                 
-                # mask_is_0, mask_is_not_0 = mask==0, mask!=0
-                target_is_0, target_is_not_0 = target==0, target!=0
-                mask = target_is_not_0.sum(axis=0)!=0
                 with torch.cuda.amp.autocast():
                     output = Net(input) * 10
-                    # _output, _target = output.clone().detach(), target.clone().detach()
-                    # _output[target_is_0], _target[target_is_0] = 0, 0
-                    # loss1 = _loss(output[:, :, mask[0]], target[:, :, mask[0]])
                     loss1 = _loss(output, target)
                     _accuracy = 0
                     for _batch in range(output.shape[0]):
