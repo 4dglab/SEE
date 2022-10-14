@@ -51,7 +51,7 @@ class Dataset(data.Dataset):
             self._scHiC_data.append(_scHiC_data.tolist())
 
             _len = int(_data['scRNA'].shape[0] / 64)
-            _input_size = tuple([ i * 8 for i in _crack(_len)])
+            _input_size = tuple([i * 8 for i in _crack(_len)])
             self._scRNA_data.append(np.array(_data['scRNA'][:_len*64].reshape(_input_size)))
 
         self._scRNA_data = np.array(self._scRNA_data, dtype='float32')
