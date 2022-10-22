@@ -38,7 +38,7 @@ def train(train_file, eval_file, output_folder, gene_name):
     test_data_loader = torch.utils.data.DataLoader(test_set, batch_size=1, shuffle=False, sampler=test_data_sampler)
 
     input_size, output_size = tuple(train_set[0][0].shape), train_set[0][1].shape[0]
-    patch_size = tuple([ int(i / 8) for i in input_size])
+    patch_size = tuple([int(i / 8) for i in input_size])
     Net = define_network(input_size, patch_size, output_size)
     optimizer = torch.optim.Adam(Net.parameters(), lr=lr)
 
