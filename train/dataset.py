@@ -42,7 +42,7 @@ class Dataset(data.Dataset):
             return int(factor), start
 
         _datas = np.load(file_path, allow_pickle=True)
-        # _filter_genes = np.load('/lmh_data/data/sclab/sclab/AD/filter_genes.npy', allow_pickle=True)
+        _filter_genes = np.load('/lmh_data/data/sclab/sclab/AD/filter_genes.npy', allow_pickle=True)
 
         self._scRNA_data, self._scHiC_data = [], []
         for _data in _datas:
@@ -53,8 +53,8 @@ class Dataset(data.Dataset):
                 self._scHiC_data.append(_scHiC_data.tolist())
 
             _scRNA, _scRNA_head = _data['scRNA'], _data['scRNA_head']
-            # _where = np.where(_scRNA_head.isin(list( _filter_genes.tolist())))
-            # _scRNA = _scRNA[_where[0]]
+            _where = np.where(_scRNA_head.isin(list( _filter_genes.tolist())))
+            _scRNA = _scRNA[_where[0]]
             _len = int(_scRNA.shape[0] / 64)
             _input_size = tuple([i * 8 for i in _crack(_len)])
             self._scRNA_data.append(np.array(_scRNA[:_len*64].reshape(_input_size)))
