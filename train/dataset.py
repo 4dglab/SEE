@@ -52,9 +52,10 @@ class Dataset(data.Dataset):
                     continue
                 self._scHiC_data.append(_scHiC_data.tolist())
 
-            _scRNA, _scRNA_head = _data['scRNA'], _data['scRNA_head']
+            _scRNA, _scRNA_head = _data['scRNA'].copy(), _data['scRNA_head']
             # _where = np.where(_scRNA_head.isin(list( _filter_genes.tolist())))
-            # _scRNA = _scRNA[_where[0]]
+            # _where = np.array(list(set(list(range(_scRNA.shape[0]))) - set(_where[0])))
+            # _scRNA[_where] = 0
             _len = int(_scRNA.shape[0] / 64)
             _input_size = tuple([i * 8 for i in _crack(_len)])
             self._scRNA_data.append(np.array(_scRNA[:_len*64].reshape(_input_size)))

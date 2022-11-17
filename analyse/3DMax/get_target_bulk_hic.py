@@ -12,8 +12,8 @@ eval_set = np.load('/lmh_data/data/sclab/sclab/eval_dataset.npy', allow_pickle=T
 data_set = np.append(train_set, eval_set)
 
 # gene_name, cell_type = 'SLC1A2', 'Astro'
-gene_name, cell_type = 'PDGFRA', 'Astro'
-# gene_name, cell_type = 'MBP', 'ODC'
+# gene_name, cell_type = 'QKI', 'ODC'
+gene_name, cell_type = 'MBP', 'ODC'
 
 
 def show_by_cell_type(cell_type):
@@ -29,10 +29,10 @@ def show_by_cell_type(cell_type):
             _hics = _hic.copy()
         else:
             _hics += _hic
-        if num >= 250:
-            break
-    if num < 250:
-        raise Exception()
+        # if num >= 250:
+            # break
+    # if num < 250:
+        # raise Exception()
     return _hics/num
 mat = array2mat(show_by_cell_type(cell_type))
 mat = mat / mat.max() * 1000
