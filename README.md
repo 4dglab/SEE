@@ -1,12 +1,11 @@
-conda create -n sclab python=3.8
-conda install pytorch cudatoolkit=11.3 -c pytorch
-pip install scglue
-pip install --user scikit-misc
-pip install cooler
-pip install einops
-pip install vit-pytorch
+# SEE
+## Directory structure
+## Requirement Installation
+The see environment can be installed via conda:
+```
+conda env create -f environment.yml
+```
 
-pip install fa2
 
 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/PDGFRA -g PDGFRA
 
@@ -30,9 +29,3 @@ python validate.py -e /lmh_data/data/sclab/sclab/AD/eval_dataset.npy -m /lmh_dat
 
 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/AD/APP/train_dataset.npy -e /lmh_data/data/sclab/sclab/AD/APP/eval_dataset.npy -o /lmh_data/data/sclab/sclab/AD/APP/tmp -g chr21_27240000_27560000
 python validate.py -e /lmh_data/data/sclab/sclab/AD/eval_dataset.npy -m /lmh_data/data/sclab/sclab/AD/APP/tmp/model_epoch_9.pth -g chr21_27240000_27560000 -o /lmh_data/data/sclab/sclab/AD/APP/evaluate.npy -s 528
-
-
-# pip install pyBigWig
-# pip install --upgrade jupyter
-# pip install ipykernel
-# python -m ipykernel install --user --name sclab
