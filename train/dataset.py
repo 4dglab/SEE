@@ -4,8 +4,6 @@ import numpy as np
 import torch
 import torch.utils.data as data
 
-from util import mat2array
-
 
 class Dataset(data.Dataset):
     '''
@@ -44,26 +42,23 @@ class Dataset(data.Dataset):
             return int(factor), start
 
         _datas = np.load(file_path, allow_pickle=True)
-
-        # self._scRNA_data = [_data['scRNA'].reshape(_crack(_data['scRNA'].shape[0])) for _data in _datas]
+        # _filter_genes = np.load('/lmh_data/data/sclab/sclab/AD/filter_genes.npy', allow_pickle=True)
 
         self._scRNA_data, self._scHiC_data = [], []
-        # scHiC_head = None
         for _data in _datas:
-            _scHiC_data = mat2array(_data['scHiC'][gene_name])
-            # _scHiC_data = np.log1p(_scHiC_data)
-            if np.all(_scHiC_data == 0):
-                continue
-            self._scHiC_data.append(_scHiC_data)
+            if self.is_train:
+                _scHiC_data = _data['scHiC'][gene_name]
+                if np.all(_scHiC_data == 0):
+                    continue
+                self._scHiC_data.append(_scHiC_data.tolist())
 
-            _len = int(_data['scRNA'].shape[0] / 64)
-            _input_size = tuple([ i * 8 for i in _crack(_len)])
-            self._scRNA_data.append(np.array(_data['scRNA'][:_len*64].reshape(_input_size)))
-            # scHiC_head = _data['scHiC'].keys() if scHiC_head is None else scHiC_head
-            # _scHiC_data = None
-            # for gene_name in scHiC_head:
-            #     _gene_scHiC_data = _data['scHiC'][gene_name].flatten()
-            #     _scHiC_data = _gene_scHiC_data if _scHiC_data is None else np.concatenate((_scHiC_data, _gene_scHiC_data))
+            _scRNA, _scRNA_head = _data['scRNA'].copy(), _data['scRNA_head']
+            # _where = np.where(_scRNA_head.isin(list( _filter_genes.tolist())))
+            # _where = np.array(list(set(list(range(_scRNA.shape[0]))) - set(_where[0])))
+            # _scRNA[_where] = 0
+            _len = int(_scRNA.shape[0] / 64)
+            _input_size = tuple([i * 8 for i in _crack(_len)])
+            self._scRNA_data.append(np.array(_scRNA[:_len*64].reshape(_input_size)))
 
         self._scRNA_data = np.array(self._scRNA_data, dtype='float32')
         self._scHiC_data = np.array(self._scHiC_data, dtype='float32')

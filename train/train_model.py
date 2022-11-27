@@ -8,6 +8,7 @@ from torch.autograd import Variable
 from torch.utils.data.distributed import DistributedSampler
 
 from dataset import Dataset
+from focalloss import FocalLoss
 from net import define_network
 from util import mkdir, get_logger, init_dist, reduce_tensor
 
@@ -24,13 +25,10 @@ def get_corr(fake_Y, Y):
     return corr
 
 
-def train(args):
-    train_file, eval_file = args.train_file, args.eval_file
-    out_dir_path = args.output_folder
-    mkdir(out_dir_path)
-    gene_name = args.gene_name
+def train(train_file, eval_file, output_folder, gene_name):
+    mkdir(output_folder)
     local_rank, device = init_dist()
-    logger = get_logger(os.path.join(out_dir_path, 'exp.log'))
+    logger = get_logger(os.path.join(output_folder, 'exp.log'))
 
     train_set = Dataset(train_file, gene_name, is_train=True)
     test_set = Dataset(eval_file, gene_name, is_train=True)
@@ -40,7 +38,7 @@ def train(args):
     test_data_loader = torch.utils.data.DataLoader(test_set, batch_size=1, shuffle=False, sampler=test_data_sampler)
 
     input_size, output_size = tuple(train_set[0][0].shape), train_set[0][1].shape[0]
-    patch_size = tuple([ int(i / 8) for i in input_size])
+    patch_size = tuple([int(i / 8) for i in input_size])
     Net = define_network(input_size, patch_size, output_size)
     optimizer = torch.optim.Adam(Net.parameters(), lr=lr)
 
@@ -49,9 +47,10 @@ def train(args):
     Net = torch.nn.parallel.DistributedDataParallel(Net, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
     scaler = torch.cuda.amp.GradScaler()
 
-    _loss = torch.nn.MSELoss(reduction='mean').to(device)
+    # _loss = torch.nn.MSELoss(reduction='mean').to(device)
+    _loss = FocalLoss().to(device)
 
-    for epoch in range(0, 100):
+    for epoch in range(0, 15):
         running_loss = 0.0
         Net.train()
         output_max = 0.0
@@ -61,14 +60,10 @@ def train(args):
         for iteration, batch in enumerate(data_loader, 1):
             input = Variable(batch[0]).to(device).unsqueeze(1)
             target = Variable(batch[1]).to(device).unsqueeze(1)
-            # mask = Variable(batch[2]).to(device).unsqueeze(1)
 
             optimizer.zero_grad()
-            # mask_is_0, mask_is_not_0 = mask==0, mask!=0
-            # target_is_0, target_is_not_0 = target==0, target!=0
             with torch.cuda.amp.autocast():
                 output = Net(input) * 10
-                # output[mask_is_0] = target[mask_is_0] = 0
                 loss1 = _loss(output, target)
                 output_max = max(output_max, output.max().item())
 
@@ -90,20 +85,16 @@ def train(args):
         if local_rank == 0:
             logger.info(str(output_max))
 
-        # 测试
+        # test
         test_loss, test_accuracy = 0.0, 0.0
         Net.eval()
         with torch.no_grad():
             for iteration, batch in enumerate(test_data_loader, 1):
                 input = Variable(batch[0]).to(device).unsqueeze(1)
                 target = Variable(batch[1]).to(device).unsqueeze(1)
-                # mask = Variable(batch[2]).to(device).unsqueeze(1)
                 
-                # mask_is_0, mask_is_not_0 = mask==0, mask!=0
-                # target_is_0, target_is_not_0 = target==0, target!=0
                 with torch.cuda.amp.autocast():
                     output = Net(input) * 10
-                    # output[mask_is_0] = target[mask_is_0] = 0
                     loss1 = _loss(output, target)
                     _accuracy = 0
                     for _batch in range(output.shape[0]):
@@ -123,7 +114,7 @@ def train(args):
                 epoch, running_loss/len(data_loader), test_loss / len(test_data_loader), test_accuracy / len(test_data_loader))
             logger.info(log_str)
 
-            save_checkpoint(Net, epoch, out_dir_path)
+            save_checkpoint(Net, epoch, output_folder)
         dist.barrier()
 
 
@@ -144,4 +135,4 @@ if __name__ == '__main__':
     req_args.add_argument('--local_rank', type=int, default=0)
 
     args = parser.parse_args(sys.argv[1:])
-    train(args)
+    train(args.train_file, args.eval_file, args.output_folder, args.gene_name)
