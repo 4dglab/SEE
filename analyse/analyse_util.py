@@ -24,9 +24,6 @@ def set_plt(figsize=(10, 10)):
               'lines.linewidth': figure_size['very_small']}
     plt.rcParams.update(params)
 
-    font = {'family': 'serif', 'serif': 'Times New Roman'}
-    plt.rc('font', **font)
-
 def set_Border(axes):
     axes.spines['top'].set_color('none')
     axes.spines['right'].set_color('none')

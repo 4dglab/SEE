@@ -1,5 +1,4 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
 from einops import repeat
 
@@ -29,7 +28,6 @@ class NET(nn.Module):
         # decoder parameters
 
         self.enc_to_dec = nn.Linear(encoder_dim, decoder_dim) if encoder_dim != decoder_dim else nn.Identity()
-        self.mask_token = nn.Parameter(torch.randn(decoder_dim))
         self.decoder = Transformer(dim = decoder_dim, depth = decoder_depth, heads = decoder_heads, dim_head = decoder_dim_head, mlp_dim = decoder_dim * 4)
         self.decoder_pos_emb = nn.Embedding(num_patches, decoder_dim)
         self.to_pixels = nn.Linear(decoder_dim, output_size)
@@ -51,7 +49,7 @@ class NET(nn.Module):
 
         encoded_tokens = self.encoder.transformer(tokens)
 
-        # project encoder to decoder dimensions, if they are not equal - the paper says you can get away with a smaller dimension for decoder
+        # project encoder to decoder dimensions
 
         decoder_tokens = self.enc_to_dec(encoded_tokens)
 
@@ -64,7 +62,7 @@ class NET(nn.Module):
 
         decoded_tokens = self.decoder(decoder_tokens)
 
-        # splice out the mask tokens and project to pixel values
+        # project to pixel values
 
         pred_tokens = repeat(decoded_tokens.mean(dim = 1), 'b d -> b c d', c = 1)
         pred_pixel_values = self.to_pixels(pred_tokens)
@@ -86,9 +84,9 @@ def define_network(input_size, patch_size, output_size):
 
     network = NET(
         encoder = v,
-        decoder_dim = 512,      # paper showed good results with just 512
+        decoder_dim = 512,
         output_size = output_size,
-        decoder_depth = 6       # anywhere from 1 to 8
+        decoder_depth = 6
     )
 
     return network
