@@ -28,6 +28,7 @@ class NET(nn.Module):
         # decoder parameters
 
         self.enc_to_dec = nn.Linear(encoder_dim, decoder_dim) if encoder_dim != decoder_dim else nn.Identity()
+        self.mask_token = nn.Parameter(torch.randn(decoder_dim))
         self.decoder = Transformer(dim = decoder_dim, depth = decoder_depth, heads = decoder_heads, dim_head = decoder_dim_head, mlp_dim = decoder_dim * 4)
         self.decoder_pos_emb = nn.Embedding(num_patches, decoder_dim)
         self.to_pixels = nn.Linear(decoder_dim, output_size)
