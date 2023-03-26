@@ -29,3 +29,50 @@ CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 tra
 python validate.py -e /lmh_data/data/sclab/sclab/mouse/tmp/chr15_8630000_8800000/eval_dataset.npy -m /lmh_data/data/sclab/sclab/mouse/tmp/chr15_8630000_8800000/model_epoch_18.pth -g 15_8630000_8800000 -o /lmh_data/data/sclab/sclab/mouse/tmp/chr15_8630000_8800000/evaluate.npy -s 153
 
 python validate.py -e /lmh_data/data/sclab/sclab/bulk/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/MBP/model_epoch_9.pth -g MBP -o /lmh_data/data/sclab/sclab/bulk/tmp/MBP/evaluate.npy -s 153
+
+<!-- fig4 -->
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/CTNNA3 -g CTNNA3
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/CTNNA3/model_epoch_14.pth -g CTNNA3 -o /lmh_data/data/sclab/sclab/tmp/CTNNA3/evaluate.npy -s 153
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/ST18 -g ST18
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/ST18/model_epoch_14.pth -g ST18 -o /lmh_data/data/sclab/sclab/tmp/ST18/evaluate.npy -s 666
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/SLC44A1 -g SLC44A1
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/SLC44A1/model_epoch_8.pth -g SLC44A1 -o /lmh_data/data/sclab/sclab/tmp/SLC44A1/evaluate.npy -s 231
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/RNF220 -g RNF220
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/RNF220/model_epoch_8.pth -g RNF220 -o /lmh_data/data/sclab/sclab/tmp/RNF220/evaluate.npy -s 351
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/DPYD -g DPYD
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/DPYD/model_epoch_14.pth -g DPYD -o /lmh_data/data/sclab/sclab/tmp/DPYD/evaluate.npy -s 351
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/PIP4K2A -g PIP4K2A
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/PIP4K2A/model_epoch_11.pth -g PIP4K2A -o /lmh_data/data/sclab/sclab/tmp/PIP4K2A/evaluate.npy -s 190
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/NCKAP5 -g NCKAP5
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/NCKAP5/model_epoch_12.pth -g NCKAP5 -o /lmh_data/data/sclab/sclab/tmp/NCKAP5/evaluate.npy -s 4278
+
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/ENPP2/model_epoch_9.pth -g ENPP2 -o /lmh_data/data/sclab/sclab/tmp/ENPP2/evaluate.npy -s 105
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/PHLPP1 -g PHLPP1
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/PHLPP1/model_epoch_8.pth -g PHLPP1 -o /lmh_data/data/sclab/sclab/tmp/PHLPP1/evaluate.npy -s 406
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/ELMO1 -g ELMO1
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/ELMO1/model_epoch_12.pth -g ELMO1 -o /lmh_data/data/sclab/sclab/tmp/ELMO1/evaluate.npy -s 1891
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/PTPRK -g PTPRK
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/PTPRK/model_epoch_11.pth -g PTPRK -o /lmh_data/data/sclab/sclab/tmp/PTPRK/evaluate.npy -s 1653
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/train_dataset.npy -e /lmh_data/data/sclab/sclab/eval_dataset.npy -o /lmh_data/data/sclab/sclab/tmp/DOCK10 -g DOCK10
+python validate.py -e /lmh_data/data/sclab/sclab/eval_dataset.npy -m /lmh_data/data/sclab/sclab/tmp/DOCK10/model_epoch_11.pth -g DOCK10 -o /lmh_data/data/sclab/sclab/tmp/DOCK10/evaluate.npy -s 465
+
+
+<!-- fig4 Mb -->
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/Mb/train_dataset.npy -e /lmh_data/data/sclab/sclab/Mb/eval_dataset.npy -o /lmh_data/data/sclab/sclab/Mb/tmp/MBP -g MBP
+python validate.py -e /lmh_data/data/sclab/sclab/Mb/eval_dataset.npy -m /lmh_data/data/sclab/sclab/Mb/tmp/MBP/model_epoch_13.pth -g MBP -o /lmh_data/data/sclab/sclab/Mb/tmp/MBP/evaluate.npy -s 6903
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/Mb/train_dataset.npy -e /lmh_data/data/sclab/sclab/Mb/eval_dataset.npy -o /lmh_data/data/sclab/sclab/Mb/tmp/CTNNA3 -g CTNNA3
+python validate.py -e /lmh_data/data/sclab/sclab/Mb/eval_dataset.npy -m /lmh_data/data/sclab/sclab/Mb/tmp/CTNNA3/model_epoch_18.pth -g CTNNA3 -o /lmh_data/data/sclab/sclab/Mb/tmp/CTNNA3/evaluate.npy -s 39340
+
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/Mb/train_dataset.npy -e /lmh_data/data/sclab/sclab/Mb/eval_dataset.npy -o /lmh_data/data/sclab/sclab/Mb/tmp/ST18 -g ST18
+python validate.py -e /lmh_data/data/sclab/sclab/Mb/eval_dataset.npy -m /lmh_data/data/sclab/sclab/Mb/tmp/ST18/model_epoch_18.pth -g ST18 -o /lmh_data/data/sclab/sclab/Mb/tmp/ST18/evaluate.npy -s 9316
