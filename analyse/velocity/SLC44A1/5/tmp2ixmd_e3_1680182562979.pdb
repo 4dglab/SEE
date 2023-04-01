@@ -1,0 +1,43 @@
+3DMAX STRUCTURE BY OLUWATOSIN OLUWADARE ET AL
+ATOM      1   CA MET A1         -6.215   2.761  -0.365  0.20 10.00
+ATOM      2   CA MET A2         -4.359   2.682   3.917  0.20 10.00
+ATOM      3   CA MET A3         -2.039  -3.183   4.705  0.20 10.00
+ATOM      4   CA MET A4         -1.110   1.080   6.700  0.20 10.00
+ATOM      5   CA MET A5          2.782  -1.706   7.261  0.20 10.00
+ATOM      6   CA MET A6         -2.309  -6.795   0.708  0.20 10.00
+ATOM      7   CA MET A7          3.953  -5.068   3.276  0.20 10.00
+ATOM      8   CA MET A8          2.835  -5.127  -0.529  0.20 10.00
+ATOM      9   CA MET A9          5.044  -2.370  -1.178  0.20 10.00
+ATOM     10   CA MET A10         4.552   2.860  -2.390  0.20 10.00
+ATOM     11   CA MET A11         4.339   2.979   4.520  0.20 10.00
+ATOM     12   CA MET A12         7.203   1.184   0.473  0.20 10.00
+ATOM     13   CA MET A13        -0.701   5.950   2.522  0.20 10.00
+ATOM     14   CA MET A14         2.184   6.893   0.358  0.20 10.00
+ATOM     15   CA MET A15        -3.622   1.009  -6.307  0.20 10.00
+ATOM     16   CA MET A16         1.820   2.371  -5.744  0.20 10.00
+ATOM     17   CA MET A17         1.536  -1.609  -6.370  0.20 10.00
+ATOM     18   CA MET A18        -1.824   4.700  -3.170  0.20 10.00
+ATOM     19   CA MET A19        -4.702  -3.483  -3.157  0.20 10.00
+ATOM     20   CA MET A20        -0.445  -5.692  -3.838  0.20 10.00
+ATOM     21   CA MET A21        -6.596  -1.320   1.903  0.20 10.00
+CONECT    1    2
+CONECT    2    3
+CONECT    3    4
+CONECT    4    5
+CONECT    5    6
+CONECT    6    7
+CONECT    7    8
+CONECT    8    9
+CONECT    9   10
+CONECT   10   11
+CONECT   11   12
+CONECT   12   13
+CONECT   13   14
+CONECT   14   15
+CONECT   15   16
+CONECT   16   17
+CONECT   17   18
+CONECT   18   19
+CONECT   19   20
+CONECT   20   21
+END

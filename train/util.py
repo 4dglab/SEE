@@ -7,6 +7,8 @@ import torch.distributed as dist
 
 
 def mkdir(out_dir):
+    if os.path.splitext(out_dir)[-1] != '':
+        out_dir = os.path.dirname(out_dir)
     if not os.path.isdir(out_dir):
         print(f'Making directory: {out_dir}')
     os.makedirs(out_dir, exist_ok=True)
