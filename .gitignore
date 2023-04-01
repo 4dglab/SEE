@@ -2,3 +2,10 @@ __pycache__
 .ipynb_checkpoints
 glue
 DPDchrom
+*.png
+
+# 3DMax
+InputData_in_TupleFormat.txt
+*.txt
+!*_log.txt
+best_alpha_log.txt

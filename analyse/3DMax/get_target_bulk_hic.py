@@ -1,7 +1,7 @@
 # should openjdk-8-jdk and 3DMax
 import os
 import sys
-sys.path.append('/lmh_data/work/sclab/')
+sys.path.append('/lmh_data/work/SEE/')
 
 import numpy as np
 import tempfile

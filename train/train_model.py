@@ -50,7 +50,7 @@ def train(train_file, eval_file, output_folder, gene_name):
     # _loss = torch.nn.MSELoss(reduction='mean').to(device)
     _loss = FocalLoss().to(device)
 
-    for epoch in range(0, 15):
+    for epoch in range(0, 30):
         running_loss = 0.0
         Net.train()
         output_max = 0.0

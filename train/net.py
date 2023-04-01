@@ -1,5 +1,4 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
 from einops import repeat
 
@@ -51,7 +50,7 @@ class NET(nn.Module):
 
         encoded_tokens = self.encoder.transformer(tokens)
 
-        # project encoder to decoder dimensions, if they are not equal - the paper says you can get away with a smaller dimension for decoder
+        # project encoder to decoder dimensions
 
         decoder_tokens = self.enc_to_dec(encoded_tokens)
 
@@ -64,7 +63,7 @@ class NET(nn.Module):
 
         decoded_tokens = self.decoder(decoder_tokens)
 
-        # splice out the mask tokens and project to pixel values
+        # project to pixel values
 
         pred_tokens = repeat(decoded_tokens.mean(dim = 1), 'b d -> b c d', c = 1)
         pred_pixel_values = self.to_pixels(pred_tokens)
@@ -86,9 +85,9 @@ def define_network(input_size, patch_size, output_size):
 
     network = NET(
         encoder = v,
-        decoder_dim = 512,      # paper showed good results with just 512
+        decoder_dim = 512,
         output_size = output_size,
-        decoder_depth = 6       # anywhere from 1 to 8
+        decoder_depth = 6
     )
 
     return network

@@ -1,3 +1,0 @@
-
-
-Best convert factor: 0.40, pick models generated using this convert factor as your final models 
