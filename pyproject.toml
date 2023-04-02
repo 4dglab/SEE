@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "scce"
+version = "0.1.0"
+description = "a Single-cell method for predicting Chromatin Conformation based on gene Expression"
+license = "MIT"
+authors = ["Ming-Hong Li <lmh0066@outlook.com>"]
+readme = "README.md"
+repository = "https://github.com/LMH0066/SEE"
+keywords = ["bioinformatics", "deep-learning", "single-cell"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+setuptools = "^67.6.1"
+scglue = "^0.3.2"
+cooler = "^0.9.1"
+hic-straw = "^1.3.1"
+vit-pytorch = "^1.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
