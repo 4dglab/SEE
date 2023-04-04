@@ -1,5 +1,5 @@
 import pytest
-from scce.mapping import preprocess
+from scce import preprocess
 
 
 def test_hic_process():

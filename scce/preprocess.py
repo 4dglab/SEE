@@ -72,6 +72,7 @@ def hic_process(
     obs = obs.loc[infos.T.index]
     obs['cell_type'], obs['domain'] = obs[cell_type], 'scHiC'
     var = infos.reset_index()[['chrom', 'start']].set_index(infos.index.map('{0[0]}_{0[1]}'.format))
+    var['end'] = var['start'] + resolution
 
     infos.index = infos.index.map('{0[0]}_{0[1]}'.format)
     infos = anndata.AnnData(X=infos.T, obs=obs, var=var, dtype='float16')
