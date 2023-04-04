@@ -5,7 +5,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 
-def load_hics(folder_path, resolution, n_jobs=1):
+def load_hics(folder_path, file_names, resolution, n_jobs=1):
     def _load_hic(folder_path, file_name):
         _suffix = os.path.splitext(file_name)[-1]
 
@@ -47,22 +47,30 @@ def load_hics(folder_path, resolution, n_jobs=1):
 
         return info.to_frame().astype('float16')
 
-    joblist = [
-        delayed(_load_hic)(folder_path, file_name)
-        for _, _, file_names in os.walk(folder_path, topdown=True)
-        for file_name in file_names
-    ]
+    joblist = [delayed(_load_hic)(folder_path, file_name) for file_name in file_names]
 
     infos = Parallel(n_jobs=n_jobs, backend='loky', verbose=1)(joblist)
     infos = pd.concat(infos, axis=1).fillna(0).sort_index()
     return infos
 
-def hic_process(hic_folder_path, output_path, resolution=10000, n_jobs=1):
-    infos = load_hics(hic_folder_path, resolution, n_jobs)
+def hic_process(
+        metadata_path, hic_folder_path, output_path,
+        column_names=dict(id='sample_name', cell_type='cell_type'), cell_types=[],
+        resolution=10000, n_jobs=1
+    ):
+    sample_name, cell_type = column_names['id'], column_names['cell_type']
 
-    obs = pd.DataFrame(infos.T.index, columns=['cells'])
-    obs.insert(obs.shape[1] - 1, 'domain', 'scHiC')
-    obs = obs.set_index('cells')
+    _metadata = pd.read_csv(metadata_path)
+    if cell_types:
+        _metadata = _metadata[_metadata[cell_type].isin(cell_types)]
+    if _metadata.empty:
+        raise ValueError('No valid sample in metadata.')
+
+    infos = load_hics(hic_folder_path, _metadata[sample_name], resolution, n_jobs)
+
+    obs = _metadata.set_index(sample_name)
+    obs = obs.loc[infos.T.index]
+    obs['cell_type'], obs['domain'] = obs[cell_type], 'scHiC'
     var = infos.reset_index()[['chrom', 'start']].set_index(infos.index.map('{0[0]}_{0[1]}'.format))
 
     infos.index = infos.index.map('{0[0]}_{0[1]}'.format)
@@ -85,11 +93,11 @@ def rna_process(
         _filter = chunk[chunk[sample_name].isin(_metadata[sample_name])]
         infos = pd.concat([infos, _filter])
     infos = infos.set_index(sample_name)
-    infos = anndata.AnnData(X=infos, dtype='int32')
 
-    _metadata = _metadata.set_index(sample_name)
-    _metadata = _metadata.loc[infos.obs.index]
-    infos.obs['cell_type'] = _metadata[cell_type]
-    infos.obs['domain'] = 'scRNA'
+    obs = _metadata.set_index(sample_name)
+    obs = obs.loc[infos.index]
+    obs['cell_type'], obs['domain'] = obs[cell_type], 'scRNA'
+
+    infos = anndata.AnnData(X=infos, obs=obs, dtype='int32')
 
     infos.write(output_path, compression="gzip")
