@@ -1,6 +1,11 @@
 # SEE
 ## Get the code
 git clone https://github.com/LMH0066/SEE.git --depth=1
+## Installation
+```
+conda install pytorch cudatoolkit=11.3 -c pytorch  # if support GPU
+conda install -c anaconda libffi=3.3
+```
 ## Prepare the environment
 The see environment can be installed via conda:
 ```
