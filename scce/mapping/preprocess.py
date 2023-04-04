@@ -69,3 +69,27 @@ def hic_process(hic_folder_path, output_path, resolution=10000, n_jobs=1):
     infos = anndata.AnnData(X=infos.T, obs=obs, var=var, dtype='float16')
 
     infos.write(output_path, compression='gzip')
+
+def rna_process(
+        metadata_path, matrix_path, output_path,
+        column_names=dict(id='sample_name', cell_type='cell_type'), cell_types=[]
+    ):
+    sample_name, cell_type = column_names['id'], column_names['cell_type']
+
+    _metadata = pd.read_csv(metadata_path)
+    if cell_types:
+        _metadata = _metadata[_metadata[cell_type].isin(cell_types)]
+
+    infos = pd.DataFrame()
+    for chunk in pd.read_csv(matrix_path, chunksize=10000):
+        _filter = chunk[chunk[sample_name].isin(_metadata[sample_name])]
+        infos = pd.concat([infos, _filter])
+    infos = infos.set_index(sample_name)
+    infos = anndata.AnnData(X=infos, dtype='int32')
+
+    _metadata = _metadata.set_index(sample_name)
+    _metadata = _metadata.loc[infos.obs.index]
+    infos.obs['cell_type'] = _metadata[cell_type]
+    infos.obs['domain'] = 'scRNA'
+
+    infos.write(output_path, compression="gzip")

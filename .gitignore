@@ -9,3 +9,7 @@ InputData_in_TupleFormat.txt
 *.txt
 !*_log.txt
 best_alpha_log.txt
+
+# test
+tests/data/hic.h5
+tests/data/rna.h5
