@@ -1,5 +1,5 @@
 import pytest
-from scce import preprocess
+from scce import preprocess, integrate
 
 
 def test_hic_process():
@@ -23,3 +23,24 @@ def test_rna_process():
     column_names = dict(id='sample_name', cell_type='subclass_label')
     cell_types = ['Astro', 'Endo', 'Oligo', 'OPC']
     preprocess.rna_process(metadata_path, matrix_path, output_path, column_names, cell_types)
+
+def test_glue_map():
+    hic_path = 'tests/data/hic.h5'
+    rna_path = 'tests/data/rna.h5'
+    cell_types = ['Astro', 'Endo', 'Oligo', 'OPC']
+    hic_pca_path = 'tests/data/hic_pca.csv'
+    gtf_path, gtf_by = 'tests/data/gtf.gtf', 'gene_id'
+    resolution = 10000
+
+    data_tool = integrate.DataTool(hic_path, rna_path, cell_types)
+    data_tool.add_hic_pca(hic_pca_path)
+    data_tool.add_gene_annotation(gtf_path, gtf_by)
+
+    data_tool.hic_pca()
+    data_tool.rna_pca()
+    data_tool.rna_highly_variable_genes()
+    hic, rna = data_tool.get_data()
+
+    graph = integrate.generate_graph(hic, rna, resolution)
+    integrate.glue_embedding(hic, rna)
+    map = integrate.mapping(hic, rna)
