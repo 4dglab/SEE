@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, Union
 
 import numpy as np
 import torch
@@ -9,16 +10,17 @@ class Dataset(data.Dataset):
     '''
     Reading the training single-cell hic dataset
     '''
-    def __init__(self, file_path, gene_name, is_train=False):
+    def __init__(self, datas_or_path: Union[Dict, str], target_label: str, is_train: bool = False):
         super(Dataset, self).__init__()
 
         self.is_train = is_train
-        self._get_data(file_path, gene_name)
+        _datas = datas_or_path if type(datas_or_path) is Dict else np.load(datas_or_path, allow_pickle=True)
+        self._get_data(_datas, target_label)
         
         logger = logging.getLogger('base')
         logger.info('Dataset is created.')
 
-    def _get_data(self, file_path, gene_name):
+    def _get_data(self, datas, target_label):
         '''
         [
             {
@@ -26,7 +28,7 @@ class Dataset(data.Dataset):
                 'scRNA_head': [], 
                 'scHiC': 
                 {
-                    'gene_name': np.array(),
+                    'target_label': np.array(),
                     ...
                 }
             },
@@ -41,13 +43,10 @@ class Dataset(data.Dataset):
                 factor = integer / start
             return int(factor), start
 
-        _datas = np.load(file_path, allow_pickle=True)
-        # _filter_genes = np.load('/lmh_data/data/sclab/sclab/AD/filter_genes.npy', allow_pickle=True)
-
         self._scRNA_data, self._scHiC_data = [], []
-        for _data in _datas:
+        for _data in datas:
             if self.is_train:
-                _scHiC_data = _data['scHiC'][gene_name]
+                _scHiC_data = _data['scHiC'][target_label]
                 if np.all(_scHiC_data == 0):
                     continue
                 self._scHiC_data.append(_scHiC_data.tolist())

@@ -10,8 +10,8 @@ from dataset import Dataset
 from net import define_network
 
 
-def evaluate(eval_file, model_file, gene_name, output_size, output_file):
-    eval_set = Dataset(eval_file, gene_name, is_train=False)
+def evaluate(eval_datas_or_path, model_file, target_label, output_size, output_file):
+    eval_set = Dataset(eval_datas_or_path, target_label, is_train=False)
     data_loader = data.DataLoader(eval_set, batch_size=1, shuffle=False)
 
     input_size = tuple(eval_set[0][0].shape)
@@ -38,9 +38,9 @@ if __name__ == '__main__':
     req_args = parser.add_argument_group('Required Arguments')
     req_args.add_argument('-e', dest='eval_file', help='', required=True)
     req_args.add_argument('-m', dest='model_file', help='', required=True)
-    req_args.add_argument('-g', dest='gene_name', help='', required=True)
+    req_args.add_argument('-l', dest='target_label', help='', required=True)
     req_args.add_argument('-s', dest='output_size', help='', required=True)
     req_args.add_argument('-o', dest='output_file', help='', required=True)
     args = parser.parse_args(sys.argv[1:])
 
-    evaluate(args.eval_file, args.model_file, args.gene_name, args.output_size, args.output_file)
+    evaluate(args.eval_file, args.model_file, args.target_label, args.output_size, args.output_file)
