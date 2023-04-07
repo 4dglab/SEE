@@ -1,28 +1,16 @@
-import os
 import anndata
-import fanc
 import pandas as pd
 from joblib import Parallel, delayed
+
+from scce.data import HiCLoader
 
 
 def load_hics(folder_path, file_names, resolution, n_jobs=1):
     def _load_hic(folder_path, file_name):
-        _suffix = os.path.splitext(file_name)[-1]
-
-        _file_path = os.path.join(folder_path, file_name)
-        if _suffix in ['.hic', '.mcool']:
-            c = fanc.load('{}@{}'.format(_file_path, resolution), mode='r')
-        elif _suffix == '.cool':
-            c = fanc.load(_file_path, mode='r')
-        else:
-            raise ValueError('File {file_name} is not a valid hic file.')
-        
+        _hic_loader = HiCLoader(folder_path, resolution)
+        c = _hic_loader.load_hic(file_name)
         binsize, chromosome_lengths = c.binsize, c.chromosome_lengths
-        if _suffix == '.hic':
-            # TODO
-            pass
-        else:
-            contact = c.pixels(join=True)[:]
+        contact = _hic_loader.get_contact(c)
 
         if binsize != resolution:
             raise ValueError(f'File {file_name} resolution is not {resolution}.')

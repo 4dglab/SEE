@@ -177,7 +177,7 @@ def glue_embedding(hic: anndata.AnnData, rna: anndata.AnnData):
     rna.obsm['X_scce'] = glue.encode_data('rna', rna)
     hic.obsm['X_scce'] = glue.encode_data('hic', hic)
 
-def mapping(hic: anndata.AnnData, rna: anndata.AnnData):
+def mapping(hic: anndata.AnnData, rna: anndata.AnnData) -> pd.DataFrame:
     combined = anndata.concat([rna, hic])
 
     _map = pd.DataFrame()
