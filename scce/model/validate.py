@@ -7,17 +7,16 @@ import torch.utils.data as data
 from torch.autograd import Variable
 
 from dataset import Dataset
-from net import define_network
+from net import load_network
 
 
-def evaluate(eval_datas_or_path, model_file, target_label, output_size, output_file):
+def evaluate(eval_datas_or_path, model_file, target_label, output_size, output_file=None):
     eval_set = Dataset(eval_datas_or_path, target_label, is_train=False)
     data_loader = data.DataLoader(eval_set, batch_size=1, shuffle=False)
 
     input_size = tuple(eval_set[0][0].shape)
     patch_size = tuple([int(i / 8) for i in input_size])
-    model = torch.nn.DataParallel(define_network(input_size, patch_size, int(output_size)))
-    model.load_state_dict(torch.load(model_file))
+    model = load_network(model_file, input_size, patch_size, int(output_size))
     model.cuda()
     model.eval()
 
@@ -31,7 +30,11 @@ def evaluate(eval_datas_or_path, model_file, target_label, output_size, output_f
             'predict': output[0, 0],
         })
 
-    np.save(output_file, np.array(output_data))
+    output_data = np.array(output_data)
+    if output_file is not None:
+        np.save(output_file, output_data)
+    return output_data
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Evaluation Script")

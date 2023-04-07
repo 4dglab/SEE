@@ -1,3 +1,4 @@
+import os
 import random
 from multiprocessing import Pool
 from typing import Dict, List, Tuple
@@ -9,6 +10,7 @@ from tqdm import tqdm
 
 from scce.data import HiCLoader
 from scce.model.train_model import train
+from scce.model.validate import evaluate
 from scce.utils import mat2array
 
 
@@ -78,5 +80,10 @@ class DataSetGenerator:
         return dict(train=self.train_dataset, eval=self.eval_dataset)
 
 
-def SCCE(dataset: Dict, target_label: str):
-    train(dataset['train'], dataset['eval'], 'SCCE', target_label)
+def build(dataset: Dict, target_label: str):
+    train(dataset['train'], dataset['eval'], os.path.join('.scce', target_label), target_label)
+
+
+def predict(dataset: List[Dict], target_label: str):
+    # TODO: solve output_size
+    return evaluate(dataset, os.path.join('.scce', target_label, 'model.pth'), target_label, output_size=0)

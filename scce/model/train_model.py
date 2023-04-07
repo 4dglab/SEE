@@ -9,13 +9,9 @@ from torch.utils.data.distributed import DistributedSampler
 
 from scce.model.dataset import Dataset
 from scce.model.focalloss import FocalLoss
-from scce.model.net import define_network
+from scce.model.net import define_network, save_network
 from scce.model.util import get_logger, init_dist, reduce_tensor
 from scce.utils import mkdir
-
-
-batch_size = 8
-lr = 0.0001
 
 
 def get_corr(fake_Y, Y):
@@ -26,7 +22,11 @@ def get_corr(fake_Y, Y):
     return corr
 
 
-def train(train_datas_or_path, eval_datas_or_path, output_folder, target_label):
+def train(
+        train_datas_or_path, eval_datas_or_path, output_folder, target_label,
+        epochs: int = 30, batch_size: int = 8, lr: float = 0.0001,
+    ):
+
     mkdir(output_folder)
     local_rank, device = init_dist()
     logger = get_logger(os.path.join(output_folder, 'exp.log'))
@@ -49,11 +49,10 @@ def train(train_datas_or_path, eval_datas_or_path, output_folder, target_label):
     scaler = torch.cuda.amp.GradScaler()
 
     _loss = FocalLoss().to(device)
-
-    for epoch in range(0, 30):
+    minimum_loss = 1000000.0
+    for epoch in range(0, epochs):
         running_loss = 0.0
         Net.train()
-        output_max = 0.0
         if local_rank != -1:
             data_loader.sampler.set_epoch(epoch)
             test_data_loader.sampler.set_epoch(epoch)
@@ -65,7 +64,6 @@ def train(train_datas_or_path, eval_datas_or_path, output_folder, target_label):
             with torch.cuda.amp.autocast():
                 output = Net(input) * 10
                 loss1 = _loss(output, target)
-                output_max = max(output_max, output.max().item())
 
             scaler.scale(loss1).backward()
 
@@ -82,8 +80,6 @@ def train(train_datas_or_path, eval_datas_or_path, output_folder, target_label):
                 print(log_str)
 
         dist.barrier()
-        if local_rank == 0:
-            logger.info(str(output_max))
 
         # test
         test_loss, test_accuracy = 0.0, 0.0
@@ -110,19 +106,19 @@ def train(train_datas_or_path, eval_datas_or_path, output_folder, target_label):
                 test_accuracy += _accuracy
 
         if local_rank == 0:
+            train_loss = running_loss / len(data_loader)
+            test_loss = test_loss / len(test_data_loader)
+            test_accuracy = test_accuracy / len(test_data_loader)
+
             log_str = "===> Epoch[{}]:\ttrain_loss: {:.10f}\ttest_loss: {:.10f}\ttest_accuracy: {:.10f}".format(
-                epoch, running_loss/len(data_loader), test_loss / len(test_data_loader), test_accuracy / len(test_data_loader))
+                epoch, train_loss, test_loss, test_accuracy)
             logger.info(log_str)
 
-            save_checkpoint(Net, epoch, output_folder)
+            if test_loss < minimum_loss:
+                minimum_loss = test_loss
+                save_network(Net, os.path.join(output_folder, 'model.pth'))
+
         dist.barrier()
-
-
-def save_checkpoint(model, epoch, out_dir_path):
-    model_out_path = os.path.join(out_dir_path, 'model_epoch_{}.pth'.format(epoch))
-
-    torch.save(model.state_dict(), model_out_path)
-    print("Checkpoint saved to {}".format(model_out_path))
 
 
 if __name__ == '__main__':

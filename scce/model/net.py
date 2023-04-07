@@ -91,3 +91,13 @@ def define_network(input_size, patch_size, output_size):
     )
 
     return network
+
+
+def save_network(network, save_path):
+    torch.save(network.state_dict(), save_path)
+
+
+def load_network(load_path, input_size, patch_size, output_size):
+    network = define_network(input_size, patch_size, output_size)
+    network.load_state_dict(torch.load(load_path))
+    return network
