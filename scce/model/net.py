@@ -93,11 +93,23 @@ def define_network(input_size, patch_size, output_size):
     return network
 
 
-def save_network(network, save_path):
-    torch.save(network.state_dict(), save_path)
+def save_network(epoch, network, optimizer, loss, input_size, patch_size, output_size, save_path):
+    torch.save(
+        {
+            'epoch': epoch,
+            'model_state_dict': network.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss,
+            'input_size': input_size,
+            'patch_size': patch_size,
+            'output_size': output_size,
+        }, save_path
+    )
 
 
-def load_network(load_path, input_size, patch_size, output_size):
-    network = define_network(input_size, patch_size, output_size)
-    network.load_state_dict(torch.load(load_path))
+def load_network(load_path):
+    # output_size = torch.load(load_path)['module.to_pixels.bias'].shape[0]
+    checkpoint = torch.load(load_path)
+    network = define_network(checkpoint['input_size'], checkpoint['patch_size'], checkpoint['output_size'])
+    network.load_state_dict(checkpoint['model_state_dict'])
     return network

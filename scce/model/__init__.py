@@ -85,5 +85,4 @@ def build(dataset: Dict, target_label: str):
 
 
 def predict(dataset: List[Dict], target_label: str):
-    # TODO: solve output_size
-    return evaluate(dataset, os.path.join('.scce', target_label, 'model.pth'), target_label, output_size=0)
+    return evaluate(dataset, os.path.join('.scce', target_label, 'model.pth'), target_label)

@@ -116,7 +116,10 @@ def train(
 
             if test_loss < minimum_loss:
                 minimum_loss = test_loss
-                save_network(Net, os.path.join(output_folder, 'model.pth'))
+                save_network(
+                    epoch, Net, optimizer, test_loss, input_size, patch_size, output_size,
+                    os.path.join(output_folder, 'model.pth')
+                )
 
         dist.barrier()
 
