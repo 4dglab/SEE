@@ -17,14 +17,15 @@ from tqdm.auto import tqdm
 class DataTool:
     def __init__(self, hic_process_path, rna_process_path, cell_types):
         hic, rna = anndata.read_h5ad(hic_process_path), anndata.read_h5ad(rna_process_path)
-        hic = hic[hic.obs['cell_type'].isin(cell_types),:]
-        rna = rna[rna.obs['cell_type'].isin(cell_types),:]
+        if cell_types:
+            hic = hic[hic.obs['cell_type'].isin(cell_types),:]
+            rna = rna[rna.obs['cell_type'].isin(cell_types),:]
         rna.layers['counts'] = rna.X.copy()
 
-        self.hic, self.rna, self.cell_types = hic, rna, cell_types
+        self.hic, self.rna = hic, rna
 
     def add_hic_pca(self, hic_pca_path):
-        hic_pca = pd.read_csv(hic_pca_path)
+        hic_pca = pd.read_csv(hic_pca_path, index_col=0)
         hic_pca = hic_pca.loc[self.hic.obs.index]
         self.hic.obsm['X_pca'] = hic_pca.to_numpy()
 
@@ -76,7 +77,7 @@ def interval_dist(x: Interval, y: Interval, resolution: int) -> int:
     return _start1 - _start2
 
 def window_graph(
-        left: Union[Bed, str], right: Union[Bed, str], window_size: int,
+        left: Union[Bed, str], right: Union[Bed, str], window_size: int, resolution: int,
         left_sorted: bool = False, right_sorted: bool = False,
         attr_fn: Optional[Callable[[Interval, Interval, float], Mapping[str, Any]]] = None
 ) -> nx.MultiDiGraph:
@@ -109,12 +110,12 @@ def window_graph(
             if r.chrom != l.chrom and r.chrom in searched_chrom:
                 del window[r]
                 continue
-            d = interval_dist(l, r)
+            d = interval_dist(l, r, resolution)
             if -window_size <= d <= window_size:
                 graph.add_edge(l.name, r.name, **attr_fn(l, r, d))
         else:
             for r in right:  # Resume from last break
-                d = interval_dist(l, r)
+                d = interval_dist(l, r, resolution)
                 window[r] = None
                 if np.isinf(d):
                     break
@@ -132,7 +133,7 @@ def generate_graph(hic: anndata.AnnData, rna: anndata.AnnData, resolution: int =
     def _dist_power_decay(x: int) -> float:
         return ((x + resolution) / resolution) ** (-0.75)
     graph = window_graph(
-        rna_bed, hic_bed, window_size=resolution,
+        rna_bed, hic_bed, window_size=resolution, resolution=resolution,
         attr_fn=lambda l, r, d, s=1: {
             'dist': abs(d), 'weight': _dist_power_decay(abs(d)), 'sign': s
         }
@@ -156,7 +157,8 @@ def generate_graph(hic: anndata.AnnData, rna: anndata.AnnData, resolution: int =
 
     return graph
 
-def glue_embedding(hic: anndata.AnnData, rna: anndata.AnnData):
+def glue_embedding(hic: anndata.AnnData, rna: anndata.AnnData, graph: nx.MultiDiGraph, CPU_ONLY: bool = False):
+    scglue.config.CPU_ONLY = CPU_ONLY
     scglue.models.configure_dataset(
         rna, 'NB', use_highly_variable=True,
         use_layer='counts', use_rep='X_pca'
@@ -179,6 +181,9 @@ def glue_embedding(hic: anndata.AnnData, rna: anndata.AnnData):
 
 def mapping(hic: anndata.AnnData, rna: anndata.AnnData) -> pd.DataFrame:
     combined = anndata.concat([rna, hic])
+
+    sc.pp.neighbors(combined, use_rep='X_scce', metric="cosine")
+    sc.tl.umap(combined)
 
     _map = pd.DataFrame()
     for cell_type in combined.obs.cell_type.unique():

@@ -13,3 +13,8 @@ best_alpha_log.txt
 # test
 tests/data/hic.h5
 tests/data/rna.h5
+tests/data/map.csv
+tests/data/hic/*.cool
+tests/data/other/*.gtf*
+tests/data/hic_mapped.h5
+tests/data/rna_mapped.h5
