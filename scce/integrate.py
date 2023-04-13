@@ -20,7 +20,8 @@ class DataTool:
         if cell_types:
             hic = hic[hic.obs['cell_type'].isin(cell_types),:]
             rna = rna[rna.obs['cell_type'].isin(cell_types),:]
-        rna.layers['counts'] = rna.X.copy()
+        if 'counts' not in rna.layers:
+            rna.layers['counts'] = rna.X.copy()
 
         self.hic, self.rna = hic, rna
 

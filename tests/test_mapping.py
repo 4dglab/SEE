@@ -1,11 +1,45 @@
+from os.path import join as opj
+
 import pytest
-from scce import preprocess, integrate
+import anndata
+
+from scce import integrate, plot, preprocess, utils
+
+
+class FileHelper:
+    def __init__(self):
+        self.output_folder_path = 'tests/data/output'
+        utils.mkdir(self.output_folder_path)
+    
+    @property
+    def preprocess_hic_path(self):
+        return opj(self.output_folder_path, 'hic.h5')
+
+    @property
+    def preprocess_rna_path(self):
+        return opj(self.output_folder_path, 'rna.h5')
+    
+    @property
+    def mapped_hic_path(self):
+        return opj(self.output_folder_path, 'hic_mapped.h5')
+
+    @property
+    def mapped_rna_path(self):
+        return opj(self.output_folder_path, 'rna_mapped.h5')
+    
+    @property
+    def mapping_path(self):
+        return opj(self.output_folder_path, 'map.csv')
+    
+    @property
+    def umap_path(self):
+        return opj(self.output_folder_path, 'umap.png')
 
 
 def test_hic_process():
     metadata_path = 'tests/data/hic/metadata.csv'
     hic_folder_path = 'tests/data/hic'
-    output_path = 'tests/data/hic.h5'
+    output_path = FileHelper().preprocess_hic_path
     column_names = dict(id='sample_name', cell_type='cell_type')
     cell_types = ['Astro', 'Endo', 'ODC', 'OPC']
     resolution = 10000
@@ -20,15 +54,15 @@ def test_hic_process():
 def test_rna_process():
     metadata_path = 'tests/data/rna/metadata.csv'
     matrix_path = 'tests/data/rna/matrix.csv'
-    output_path = 'tests/data/rna.h5'
+    output_path = FileHelper().preprocess_rna_path
     column_names = dict(id='sample_name', cell_type='subclass_label')
     cell_types = ['Astro', 'Endo', 'Oligo', 'OPC']
     preprocess.rna_process(metadata_path, matrix_path, output_path, column_names, cell_types)
 
 
 def test_integrate():
-    hic_path = 'tests/data/hic.h5'
-    rna_path = 'tests/data/rna.h5'
+    hic_path = FileHelper().preprocess_hic_path
+    rna_path = FileHelper().preprocess_rna_path
     cell_types = ['Astro', 'Endo', 'Oligo', 'ODC', 'OPC']
     hic_pca_path = 'tests/data/other/hic_pca.csv'
     gtf_path, gtf_by = 'tests/data/other/gencode.v19.annotation.gtf', 'gene_name'
@@ -48,6 +82,16 @@ def test_integrate():
     integrate.glue_embedding(hic, rna, graph, CPU_ONLY=True)
     map = integrate.mapping(hic, rna)
 
-    hic.write('tests/data/hic_mapped.h5', compression='gzip')
-    rna.write('tests/data/rna_mapped.h5', compression='gzip')
-    map.to_csv('tests/data/map.csv')
+    hic.write(FileHelper().mapped_hic_path, compression='gzip')
+    rna.write(FileHelper().mapped_rna_path, compression='gzip')
+    map.to_csv(FileHelper().mapping_path)
+
+
+def test_plot():
+    hic_path = FileHelper().mapped_hic_path
+    rna_path = FileHelper().mapped_rna_path
+    umap_kwargs = dict(color=['cell_type', 'domain'], show=False)
+    hic, rna = anndata.read_h5ad(hic_path), anndata.read_h5ad(rna_path)
+    combined = anndata.concat([rna, hic])
+
+    plot.umap(combined, umap_kwargs, FileHelper().umap_path)
