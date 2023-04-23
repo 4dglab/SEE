@@ -41,7 +41,7 @@ class DataSetGenerator:
                 _contact = pd.DataFrame([dict(p.map(_catch_location, _args))], index=[hic_name])
             _contacts = pd.concat([_contacts, _contact], axis=0)
         return _contacts
-    
+
     def _generate_dataset(self, contacts: pd.DataFrame, eval_preportion: float):
         _dataset = []
         for scRNA, row in tqdm(self.map.iterrows(), total = self.map.shape[0]):
