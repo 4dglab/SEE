@@ -1,0 +1,53 @@
+3DMAX STRUCTURE BY OLUWATOSIN OLUWADARE ET AL
+ATOM      1   CA MET A1         -5.049   2.853   4.473  0.20 10.00
+ATOM      2   CA MET A2         -4.978   3.755   0.522  0.20 10.00
+ATOM      3   CA MET A3         -1.849   5.503  -0.184  0.20 10.00
+ATOM      4   CA MET A4          0.975  -7.953  -0.608  0.20 10.00
+ATOM      5   CA MET A5         -8.059  -1.832   2.057  0.20 10.00
+ATOM      6   CA MET A6         -3.220  -4.812  -5.179  0.20 10.00
+ATOM      7   CA MET A7          6.834  -2.062  -1.049  0.20 10.00
+ATOM      8   CA MET A8          3.407  -3.840  -3.002  0.20 10.00
+ATOM      9   CA MET A9          1.330  -2.694  -6.971  0.20 10.00
+ATOM     10   CA MET A10         3.658  -0.053  -5.104  0.20 10.00
+ATOM     11   CA MET A11        -2.569  -3.657   3.385  0.20 10.00
+ATOM     12   CA MET A12        -3.848  -1.502   4.525  0.20 10.00
+ATOM     13   CA MET A13        -3.684  -6.174   0.360  0.20 10.00
+ATOM     14   CA MET A14        -4.908  -2.904  -1.369  0.20 10.00
+ATOM     15   CA MET A15         2.375  -6.532   2.801  0.20 10.00
+ATOM     16   CA MET A16        -1.570   2.241  -6.208  0.20 10.00
+ATOM     17   CA MET A17         0.019   4.630  -4.173  0.20 10.00
+ATOM     18   CA MET A18         4.578   3.810  -4.035  0.20 10.00
+ATOM     19   CA MET A19        -4.682   1.472  -4.159  0.20 10.00
+ATOM     20   CA MET A20         1.639  -3.772   4.592  0.20 10.00
+ATOM     21   CA MET A21         6.218  -0.822   3.217  0.20 10.00
+ATOM     22   CA MET A22         5.154   3.915   1.467  0.20 10.00
+ATOM     23   CA MET A23         2.710   0.681   5.324  0.20 10.00
+ATOM     24   CA MET A24        -0.898   0.077   7.491  0.20 10.00
+ATOM     25   CA MET A25         0.887   3.842   4.535  0.20 10.00
+ATOM     26   CA MET A26         3.150   6.893   5.293  0.20 10.00
+CONECT    1    2
+CONECT    2    3
+CONECT    3    4
+CONECT    4    5
+CONECT    5    6
+CONECT    6    7
+CONECT    7    8
+CONECT    8    9
+CONECT    9   10
+CONECT   10   11
+CONECT   11   12
+CONECT   12   13
+CONECT   13   14
+CONECT   14   15
+CONECT   15   16
+CONECT   16   17
+CONECT   17   18
+CONECT   18   19
+CONECT   19   20
+CONECT   20   21
+CONECT   21   22
+CONECT   22   23
+CONECT   23   24
+CONECT   24   25
+CONECT   25   26
+END

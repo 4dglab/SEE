@@ -1,0 +1,7 @@
+Input file: InputData_in_TupleFormat.txt
+Convert factor: 0.4
+Learning rate: 1.0
+AVG RMSE: 101.50997938227417
+AVG Spearman correlation IFs vs. Reconstructed Dist: -0.5536967891214483
+AVG Spearman correlation WishDist vs. Reconstructed Dist: 0.5536967891214483
+AVG Pearson correlation WishDist vs. Reconstructed Dist: 0.5743265798463228

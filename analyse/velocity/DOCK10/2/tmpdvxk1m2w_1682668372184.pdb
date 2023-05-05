@@ -1,0 +1,61 @@
+3DMAX STRUCTURE BY OLUWATOSIN OLUWADARE ET AL
+ATOM      1   CA MET A1          4.498   2.415   6.885  0.20 10.00
+ATOM      2   CA MET A2          7.358   1.969   3.459  0.20 10.00
+ATOM      3   CA MET A3          0.794  -4.651   6.093  0.20 10.00
+ATOM      4   CA MET A4          6.831  -4.054   1.630  0.20 10.00
+ATOM      5   CA MET A5          3.103  -4.367   3.333  0.20 10.00
+ATOM      6   CA MET A6         -1.623  -5.149   4.149  0.20 10.00
+ATOM      7   CA MET A7         -5.756   0.789   0.209  0.20 10.00
+ATOM      8   CA MET A8         -0.495   0.563   6.230  0.20 10.00
+ATOM      9   CA MET A9         -4.525  -2.864   3.555  0.20 10.00
+ATOM     10   CA MET A10         1.435  -0.176  -5.989  0.20 10.00
+ATOM     11   CA MET A11         4.151  -3.807  -3.794  0.20 10.00
+ATOM     12   CA MET A12        -4.668  -3.116  -1.084  0.20 10.00
+ATOM     13   CA MET A13         3.207  -6.169  -0.256  0.20 10.00
+ATOM     14   CA MET A14         7.334  -1.325  -2.563  0.20 10.00
+ATOM     15   CA MET A15        -1.435   2.299  -7.326  0.20 10.00
+ATOM     16   CA MET A16         4.969   5.100  -5.270  0.20 10.00
+ATOM     17   CA MET A17         1.177   5.298  -3.587  0.20 10.00
+ATOM     18   CA MET A18         3.278   3.238  -1.658  0.20 10.00
+ATOM     19   CA MET A19        -4.174  -0.392  -4.088  0.20 10.00
+ATOM     20   CA MET A20        -4.237   3.062  -0.606  0.20 10.00
+ATOM     21   CA MET A21        -0.775  -3.828  -4.662  0.20 10.00
+ATOM     22   CA MET A22        -1.627  -2.096  -6.340  0.20 10.00
+ATOM     23   CA MET A23         1.100  -5.763  -2.337  0.20 10.00
+ATOM     24   CA MET A24        -2.778  -7.739  -0.596  0.20 10.00
+ATOM     25   CA MET A25         4.272   0.474   1.453  0.20 10.00
+ATOM     26   CA MET A26         2.736   6.460  -0.136  0.20 10.00
+ATOM     27   CA MET A27        -2.997   6.412   1.385  0.20 10.00
+ATOM     28   CA MET A28        -0.634   5.086   2.350  0.20 10.00
+ATOM     29   CA MET A29        -6.901   1.520   4.600  0.20 10.00
+ATOM     30   CA MET A30        -3.101   2.079   5.666  0.20 10.00
+CONECT    1    2
+CONECT    2    3
+CONECT    3    4
+CONECT    4    5
+CONECT    5    6
+CONECT    6    7
+CONECT    7    8
+CONECT    8    9
+CONECT    9   10
+CONECT   10   11
+CONECT   11   12
+CONECT   12   13
+CONECT   13   14
+CONECT   14   15
+CONECT   15   16
+CONECT   16   17
+CONECT   17   18
+CONECT   18   19
+CONECT   19   20
+CONECT   20   21
+CONECT   21   22
+CONECT   22   23
+CONECT   23   24
+CONECT   24   25
+CONECT   25   26
+CONECT   26   27
+CONECT   27   28
+CONECT   28   29
+CONECT   29   30
+END
