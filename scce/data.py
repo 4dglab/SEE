@@ -41,4 +41,5 @@ class HiCLoader:
         elif strand == '-':
             end += 5000
 
-        return c.matrix(balance=False).fetch('{}:{}-{}'.format(chrom, start, end))
+        _loc = '{}:{}-{}'.format(chrom, start, end)
+        return c.matrix((_loc, _loc)).data

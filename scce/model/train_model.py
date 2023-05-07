@@ -4,13 +4,15 @@ import sys
 
 import torch
 import torch.distributed as dist
+import torch.multiprocessing as mp
 from torch.autograd import Variable
 from torch.utils.data.distributed import DistributedSampler
+from torch.utils.tensorboard import SummaryWriter
 
 from scce.model.dataset import Dataset
 from scce.model.focalloss import FocalLoss
 from scce.model.net import define_network, save_network
-from scce.model.util import get_logger, init_dist, reduce_tensor
+from scce.model.util import find_devices, init_dist, reduce_tensor
 from scce.utils import mkdir
 
 
@@ -22,14 +24,14 @@ def get_corr(fake_Y, Y):
     return corr
 
 
-def train(
-        train_datas_or_path, eval_datas_or_path, output_folder, target_label,
-        epochs: int = 30, batch_size: int = 8, lr: float = 0.0001,
+def main(
+        rank, train_datas_or_path, eval_datas_or_path, output_folder, target_label,
+        world_size: int, epochs: int, batch_size: int, lr: float,
     ):
 
     mkdir(output_folder)
-    local_rank, device = init_dist()
-    logger = get_logger(os.path.join(output_folder, 'exp.log'))
+    local_rank, device = init_dist(rank, world_size)
+    writer = SummaryWriter(log_dir=os.path.join(output_folder, 'tensorboard'))
 
     train_set = Dataset(train_datas_or_path, target_label, is_train=True)
     test_set = Dataset(eval_datas_or_path, target_label, is_train=True)
@@ -74,10 +76,7 @@ def train(
             loss1 = reduce_tensor(loss1.clone())
 
             running_loss += loss1.item()
-            if iteration % 10 == 0 and local_rank == 0:
-                log_str = "===> Epoch[{}]({}/{}): Loss: {:.10f}".format(
-                    epoch, iteration, len(data_loader), running_loss/iteration)
-                print(log_str)
+            writer.add_scalar('loss', loss1.item())
 
         dist.barrier()
 
@@ -110,9 +109,9 @@ def train(
             test_loss = test_loss / len(test_data_loader)
             test_accuracy = test_accuracy / len(test_data_loader)
 
-            log_str = "===> Epoch[{}]:\ttrain_loss: {:.10f}\ttest_loss: {:.10f}\ttest_accuracy: {:.10f}".format(
-                epoch, train_loss, test_loss, test_accuracy)
-            logger.info(log_str)
+            writer.add_scalar('train_loss', train_loss)
+            writer.add_scalar('test_loss', test_loss)
+            writer.add_scalar('acc', test_accuracy)
 
             if test_loss < minimum_loss:
                 minimum_loss = test_loss
@@ -122,6 +121,21 @@ def train(
                 )
 
         dist.barrier()
+    
+    writer.flush()
+
+
+def train(
+        train_datas_or_path, eval_datas_or_path, output_folder, target_label,
+        world_size: int = 1, epochs: int = 30, batch_size: int = 8, lr: float = 0.0001,
+):
+    find_devices(world_size)
+    mp.spawn(
+        main,
+        args=(train_datas_or_path, eval_datas_or_path, output_folder, target_label,
+              world_size, epochs, batch_size, lr,),
+        nprocs=world_size, join=True,
+    )
 
 
 if __name__ == '__main__':
@@ -135,3 +149,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args(sys.argv[1:])
     train(args.train_file, args.eval_file, args.output_folder, args.target_label)
+
+    # import numpy as np
+    # dataset = np.load('/lmh_data/work/SEE/tests/data/output/dataset.npy', allow_pickle=True).item()
+    # train(dataset['train'], dataset['eval'], os.path.join('.scce', 'PDGFRA'), 'PDGFRA')

@@ -35,3 +35,7 @@ class FileHelper:
     @property
     def evaluate_path(self):
         return opj(self.output_folder_path, 'evaluate.npy')
+
+    @property
+    def dataset_path(self):
+        return opj(self.output_folder_path, 'dataset.npy')

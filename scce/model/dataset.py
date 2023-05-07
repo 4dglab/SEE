@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Union
+from typing import Union
 
 import numpy as np
 import torch
@@ -10,11 +10,11 @@ class Dataset(data.Dataset):
     '''
     Reading the training single-cell hic dataset
     '''
-    def __init__(self, datas_or_path: Union[Dict, str], target_label: str, is_train: bool = False):
+    def __init__(self, datas_or_path: Union[str, list], target_label: str, is_train: bool = False):
         super(Dataset, self).__init__()
 
         self.is_train = is_train
-        _datas = datas_or_path if type(datas_or_path) is Dict else np.load(datas_or_path, allow_pickle=True)
+        _datas = datas_or_path if type(datas_or_path) is list else np.load(datas_or_path, allow_pickle=True)
         self._get_data(_datas, target_label)
         
         logger = logging.getLogger('base')

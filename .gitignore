@@ -14,3 +14,4 @@ best_alpha_log.txt
 tests/data/output
 tests/data/hic/*.cool
 tests/data/other/*.gtf*
+.scce

@@ -1,11 +1,11 @@
 import os
 import random
-from multiprocessing import Pool
 from typing import Dict, List, Tuple
 
 import anndata
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from scce.data import HiCLoader
@@ -24,21 +24,23 @@ class DataSetGenerator:
     def _get_hics(self, hic_names: List[str], n_jobs: int) -> Dict:
         def _get_hic(file_name: str):
             return file_name, self.hic_loader.load_hic(file_name)
-        with Pool(n_jobs) as p:
-            hics = dict(p.map(_get_hic, hic_names))
-        return hics
 
-    def _catch_locations(self, hic_names: List[str], locations: List[Tuple[str, int, int]], n_jobs: int) -> pd.DataFrame:
-        def _catch_location(_args) -> Tuple[str, np.ndarray]:
-            hic_name, chrom, chromStart, chromEnd = _args
+        joblist = [delayed(_get_hic)(hic_name) for hic_name in hic_names]
+        infos = Parallel(n_jobs=n_jobs, backend='loky', verbose=1)(joblist)
+        return dict(infos)
+
+    def _catch_locations(self, hic_names: List[str], locations: Dict, n_jobs: int) -> pd.DataFrame:
+        def _catch_location(hic_name, chrom, chromStart, chromEnd, label) -> Tuple[str, np.ndarray]:
             mat = self.hic_loader.catch_matrix(self.hics[hic_name], chrom, chromStart, chromEnd)
-            return '{}_{}_{}'.format(chrom, chromStart, chromEnd), mat2array(mat).astype(np.uint16)
+            return label, mat2array(mat).astype(np.uint16)
 
         _contacts = pd.DataFrame()
         for hic_name in tqdm(hic_names):
-            with Pool(n_jobs) as p:
-                _args = [(hic_name, location[0], location[1], location[2]) for location in locations]
-                _contact = pd.DataFrame([dict(p.map(_catch_location, _args))], index=[hic_name])
+            joblist = [delayed(_catch_location)(
+                hic_name, location['chrom'], location['chromStart'], location['chromEnd'], location['label']
+                ) for location in locations]
+            infos = Parallel(n_jobs=n_jobs, backend='loky', verbose=1)(joblist)
+            _contact = pd.DataFrame([dict(infos)], index=[hic_name])
             _contacts = pd.concat([_contacts, _contact], axis=0)
         return _contacts
 
@@ -62,7 +64,12 @@ class DataSetGenerator:
         _hic_names = self.map['scHiC'].unique().tolist()
         self.hics = self._get_hics(_hic_names, n_jobs)
         locations = [
-            (self.rna.var.loc[gene_name]['chrom'], int(self.rna.var.loc[gene_name]['chromStart']), int(self.rna.var.loc[gene_name]['chromEnd']))
+            {
+                'chrom': self.rna.var.loc[gene_name]['chrom'],
+                'chromStart': int(self.rna.var.loc[gene_name]['chromStart']),
+                'chromEnd': int(self.rna.var.loc[gene_name]['chromEnd']),
+                'label': gene_name,
+            }
             for gene_name in gene_names
         ]
         contacts = self._catch_locations(_hic_names, locations, n_jobs)
@@ -72,6 +79,15 @@ class DataSetGenerator:
     def generate_by_location(self, locations: List[Tuple[str, int, int]], n_jobs: int = 1, eval_preportion: float = 0.1):
         _hic_names = self.map['scHiC'].unique().tolist()
         self.hics = self._get_hics(_hic_names, n_jobs)
+        locations = [
+            {
+                'chrom': location[0],
+                'chromStart': location[1],
+                'chromEnd': location[2],
+                'label': '{}_{}_{}'.format(location[0], location[1], location[2]),
+            }
+            for location in locations
+        ]
         contacts = self._catch_locations(_hic_names, locations, n_jobs)
 
         self._generate_dataset(contacts, eval_preportion)

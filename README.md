@@ -9,7 +9,7 @@ apt-get install bedtools
 conda create -n see python=3.8 libffi=3.3
 pip install poetry
 poetry install
-pip install torch==1.12.1+cu113 https://download.pytorch.org/whl/cu113 # if support GPU
+pip install torch==1.12.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113 # if support GPU
 ```
 ## Prepare the environment
 The see environment can be installed via conda:
