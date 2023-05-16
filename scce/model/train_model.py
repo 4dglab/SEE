@@ -31,7 +31,7 @@ def main(
 
     mkdir(output_folder)
     local_rank, device = init_dist(rank, world_size)
-    writer = SummaryWriter(log_dir=os.path.join(output_folder, 'tensorboard'))
+    writer = SummaryWriter(log_dir=os.path.join(output_folder, 'tensorboard')) if local_rank == 0 else None
 
     train_set = Dataset(train_datas_or_path, target_label, is_train=True)
     test_set = Dataset(eval_datas_or_path, target_label, is_train=True)
@@ -76,7 +76,8 @@ def main(
             loss1 = reduce_tensor(loss1.clone())
 
             running_loss += loss1.item()
-            writer.add_scalar('loss', loss1.item())
+            if local_rank == 0:
+                writer.add_scalar('loss', loss1.item(), epoch * len(data_loader) + iteration)
 
         dist.barrier()
 
@@ -109,9 +110,9 @@ def main(
             test_loss = test_loss / len(test_data_loader)
             test_accuracy = test_accuracy / len(test_data_loader)
 
-            writer.add_scalar('train_loss', train_loss)
-            writer.add_scalar('test_loss', test_loss)
-            writer.add_scalar('acc', test_accuracy)
+            writer.add_scalar('train_loss', train_loss, epoch)
+            writer.add_scalar('test_loss', test_loss, epoch)
+            writer.add_scalar('acc', test_accuracy, epoch)
 
             if test_loss < minimum_loss:
                 minimum_loss = test_loss
@@ -149,7 +150,3 @@ if __name__ == '__main__':
 
     args = parser.parse_args(sys.argv[1:])
     train(args.train_file, args.eval_file, args.output_folder, args.target_label)
-
-    # import numpy as np
-    # dataset = np.load('/lmh_data/work/SEE/tests/data/output/dataset.npy', allow_pickle=True).item()
-    # train(dataset['train'], dataset['eval'], os.path.join('.scce', 'PDGFRA'), 'PDGFRA')

@@ -1,3 +1,5 @@
+import math
+
 import torch
 from torch import nn
 from einops import repeat
@@ -72,20 +74,21 @@ class NET(nn.Module):
 
 
 def define_network(input_size, patch_size, output_size):
+    dim = math.prod(patch_size)
     v = ViT(
         image_size = input_size,
         patch_size = patch_size,
         num_classes = 1000,
-        dim = 1024,
+        dim = dim,
         depth = 6,
         heads = 8,
-        mlp_dim = 2048,
+        mlp_dim = dim * 2,
         channels = 1
     )
 
     network = NET(
         encoder = v,
-        decoder_dim = 512,
+        decoder_dim = int(dim / 2),
         output_size = output_size,
         decoder_depth = 6
     )
@@ -108,8 +111,8 @@ def save_network(epoch, network, optimizer, loss, input_size, patch_size, output
 
 
 def load_network(load_path):
-    # output_size = torch.load(load_path)['module.to_pixels.bias'].shape[0]
     checkpoint = torch.load(load_path)
     network = define_network(checkpoint['input_size'], checkpoint['patch_size'], checkpoint['output_size'])
+    network = torch.nn.DataParallel(network)
     network.load_state_dict(checkpoint['model_state_dict'])
     return network
