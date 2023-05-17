@@ -20,12 +20,8 @@ def evaluate(eval_datas_or_path, model_file, target_label, output_file=None):
     output_data = []
     for _, batch in enumerate(data_loader, 1):
         input = Variable(batch[0]).cuda().unsqueeze(1)
-        target = Variable(batch[1]).cuda().unsqueeze(1).cpu().numpy()
         output = model(input).detach().cpu().numpy()
-        output_data.append({
-            'target': target[0, 0],
-            'predict': output[0, 0],
-        })
+        output_data.append(output[0, 0])
 
     output_data = np.array(output_data)
     if output_file is not None:

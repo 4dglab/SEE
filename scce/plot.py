@@ -81,13 +81,13 @@ def umap(anndata: sc.AnnData, umap_kwargs: dict, output_path: str = None):
         plt.savefig(output_path, bbox_inches='tight')
 
 
-def box(anndata: sc.AnnData, x, y, hue, output_path: str = None):
+def box(data, x=None, y=None, hue=None, xticklabels=None, output_path: str = None):
     set_plt(figsize=(10, 10))
     sns.set_theme(style="whitegrid")
 
     fig, ax = plt.subplots()
 
-    ax = sns.boxplot(data=anndata, x=x, y=y, hue=hue, linewidth=figure_size['very_small'])
+    ax = sns.boxplot(data=data, x=x, y=y, hue=hue, linewidth=figure_size['very_small'])
 
     set_Border(plt.gca())
     plt.tick_params(colors='black', bottom=True, left=True, labelsize=figure_size['ultra'])
@@ -95,8 +95,12 @@ def box(anndata: sc.AnnData, x, y, hue, output_path: str = None):
         frameon=False, markerscale=2, borderpad=1, borderaxespad=0, fontsize=figure_size['middle'], loc='lower right')
     plt.grid(False)
 
-    plt.xlabel(x, fontsize=figure_size['ultra'])
-    plt.ylabel(y, fontsize=figure_size['ultra'])
+    if x:
+        plt.xlabel(x, fontsize=figure_size['ultra'])
+    if y:
+        plt.ylabel(y, fontsize=figure_size['ultra'])
+    if xticklabels:
+        ax.set_xticklabels(labels=xticklabels) 
 
     if output_path:
         plt.savefig(output_path, bbox_inches='tight')

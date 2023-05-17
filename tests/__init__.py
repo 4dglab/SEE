@@ -31,11 +31,15 @@ class FileHelper:
     @property
     def umap_path(self):
         return opj(self.output_folder_path, 'umap.png')
-    
-    @property
-    def evaluate_path(self):
-        return opj(self.output_folder_path, 'evaluate.npy')
 
     @property
     def dataset_path(self):
         return opj(self.output_folder_path, 'dataset.npy')
+    
+    @property
+    def evaluate_predict_path(self):
+        return opj(self.output_folder_path, 'evaluate.npy')
+    
+    @property
+    def predict_pearson_boxplot_path(self):
+        return opj(self.output_folder_path, 'predict_pearson_boxplot.pdf')

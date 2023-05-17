@@ -1,6 +1,7 @@
 import anndata
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from scce import plot
 from scce.model import build, DataSetGenerator, predict
@@ -27,9 +28,24 @@ def test_train_and_evaluate():
     train_dataset, eval_dataset = dataset['train'], dataset['eval']
     build(dict(train=train_dataset, eval=eval_dataset), target_label=target_label)
     evaluate = predict(dataset=eval_dataset, target_label=target_label)
-    np.save(FileHelper().evaluate_path, evaluate)
+    np.save(FileHelper().evaluate_predict_path, evaluate)
 
 
 def test_plot():
-    evaluate = np.load(FileHelper().evaluate_path)
-    plot.box(evaluate, )
+    target_label = 'PDGFRA'
+    cell_types = ['Astro', 'Endo', 'OPC']
+
+    def cal_by_cell_type(targets, predicts, cell_type):
+        _values = []
+        for i in range(len(predicts)):
+            pred = predicts[i]
+            if targets[i]['cell_type'] != cell_type:
+                continue
+            _values.append(stats.pearsonr(pred, targets[i]['scHiC'][target_label])[0])
+        return _values
+
+    evaluate_target = np.load(FileHelper().dataset_path, allow_pickle=True).item()['eval']
+    evaluate_predict = np.load(FileHelper().evaluate_predict_path, allow_pickle=True)
+    
+    data = [cal_by_cell_type(evaluate_target, evaluate_predict, cell_type) for cell_type in cell_types]
+    plot.box(data, xticklabels=cell_types, output_path=FileHelper().predict_pearson_boxplot_path)
