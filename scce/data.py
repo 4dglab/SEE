@@ -1,14 +1,14 @@
 import os
 
 import fanc
-from fanc.compatibility.juicer import JuicerHic
 from fanc.compatibility.cooler import CoolerHic
+from fanc.compatibility.juicer import JuicerHic
 
 
 class HiCLoader:
-    HiC = '.hic'
-    Mcool = '.mcool'
-    Cool = '.cool'
+    HiC = ".hic"
+    Mcool = ".mcool"
+    Cool = ".cool"
 
     def __init__(self, folder_path, resolution):
         self.folder_path = folder_path
@@ -19,14 +19,14 @@ class HiCLoader:
 
         _file_path = os.path.join(self.folder_path, file_name)
         if _suffix in [HiCLoader.HiC, HiCLoader.Mcool]:
-            c = fanc.load('{}@{}'.format(_file_path, self.resolution), mode='r')
+            c = fanc.load("{}@{}".format(_file_path, self.resolution), mode="r")
         elif _suffix == HiCLoader.Cool:
-            c = fanc.load(_file_path, mode='r')
+            c = fanc.load(_file_path, mode="r")
         else:
-            raise ValueError('File {file_name} is not a valid hic file.')
+            raise ValueError("File {file_name} is not a valid hic file.")
 
         return c
-    
+
     def get_contact(self, c):
         if type(c) is JuicerHic:
             # TODO
@@ -34,12 +34,12 @@ class HiCLoader:
         elif type(c) is CoolerHic:
             contact = c.pixels(join=True)[:]
         return contact
-    
+
     def catch_matrix(self, c, chrom: str, start: int, end: int, strand: str = None):
-        if strand == '+':
+        if strand == "+":
             start -= 5000
-        elif strand == '-':
+        elif strand == "-":
             end += 5000
 
-        _loc = '{}:{}-{}'.format(chrom, start, end)
+        _loc = "{}:{}-{}".format(chrom, start, end)
         return c.matrix((_loc, _loc)).data

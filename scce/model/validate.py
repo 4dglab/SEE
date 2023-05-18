@@ -1,5 +1,5 @@
-import sys
 import argparse
+import sys
 
 import numpy as np
 import torch.utils.data as data
@@ -29,13 +29,13 @@ def evaluate(eval_datas_or_path, model_file, target_label, output_file=None):
     return output_data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluation Script")
-    req_args = parser.add_argument_group('Required Arguments')
-    req_args.add_argument('-e', dest='eval_file', help='', required=True)
-    req_args.add_argument('-m', dest='model_file', help='', required=True)
-    req_args.add_argument('-l', dest='target_label', help='', required=True)
-    req_args.add_argument('-o', dest='output_file', help='', required=True)
+    req_args = parser.add_argument_group("Required Arguments")
+    req_args.add_argument("-e", dest="eval_file", help="", required=True)
+    req_args.add_argument("-m", dest="model_file", help="", required=True)
+    req_args.add_argument("-l", dest="target_label", help="", required=True)
+    req_args.add_argument("-o", dest="output_file", help="", required=True)
     args = parser.parse_args(sys.argv[1:])
 
     evaluate(args.eval_file, args.model_file, args.target_label, args.output_file)

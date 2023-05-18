@@ -20,25 +20,41 @@ def get_corr(fake_Y, Y):
     fake_Y, Y = fake_Y.reshape(-1), Y.reshape(-1)
     fake_Y_mean, Y_mean = torch.mean(fake_Y), torch.mean(Y)
     corr = (torch.sum((fake_Y - fake_Y_mean) * (Y - Y_mean))) / (
-                torch.sqrt(torch.sum((fake_Y - fake_Y_mean) ** 2)) * torch.sqrt(torch.sum((Y - Y_mean) ** 2)))
+        torch.sqrt(torch.sum((fake_Y - fake_Y_mean) ** 2))
+        * torch.sqrt(torch.sum((Y - Y_mean) ** 2))
+    )
     return corr
 
 
 def main(
-        rank, train_datas_or_path, eval_datas_or_path, output_folder, target_label,
-        world_size: int, epochs: int, batch_size: int, lr: float,
-    ):
-
+    rank,
+    train_datas_or_path,
+    eval_datas_or_path,
+    output_folder,
+    target_label,
+    world_size: int,
+    epochs: int,
+    batch_size: int,
+    lr: float,
+):
     mkdir(output_folder)
     local_rank, device = init_dist(rank, world_size)
-    writer = SummaryWriter(log_dir=os.path.join(output_folder, 'tensorboard')) if local_rank == 0 else None
+    writer = (
+        SummaryWriter(log_dir=os.path.join(output_folder, "tensorboard"))
+        if local_rank == 0
+        else None
+    )
 
     train_set = Dataset(train_datas_or_path, target_label, is_train=True)
     test_set = Dataset(eval_datas_or_path, target_label, is_train=True)
     data_sampler = DistributedSampler(train_set)
-    data_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=False, sampler=data_sampler)
+    data_loader = torch.utils.data.DataLoader(
+        train_set, batch_size=batch_size, shuffle=False, sampler=data_sampler
+    )
     test_data_sampler = DistributedSampler(test_set)
-    test_data_loader = torch.utils.data.DataLoader(test_set, batch_size=1, shuffle=False, sampler=test_data_sampler)
+    test_data_loader = torch.utils.data.DataLoader(
+        test_set, batch_size=1, shuffle=False, sampler=test_data_sampler
+    )
 
     input_size, output_size = tuple(train_set[0][0].shape), train_set[0][1].shape[0]
     patch_size = tuple([int(i / 8) for i in input_size])
@@ -47,7 +63,12 @@ def main(
 
     Net.to(device)
     Net = torch.nn.SyncBatchNorm.convert_sync_batchnorm(Net).to(device)
-    Net = torch.nn.parallel.DistributedDataParallel(Net, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
+    Net = torch.nn.parallel.DistributedDataParallel(
+        Net,
+        device_ids=[local_rank],
+        output_device=local_rank,
+        find_unused_parameters=True,
+    )
     scaler = torch.cuda.amp.GradScaler()
 
     _loss = FocalLoss().to(device)
@@ -77,7 +98,9 @@ def main(
 
             running_loss += loss1.item()
             if local_rank == 0:
-                writer.add_scalar('loss', loss1.item(), epoch * len(data_loader) + iteration)
+                writer.add_scalar(
+                    "loss", loss1.item(), epoch * len(data_loader) + iteration
+                )
 
         dist.barrier()
 
@@ -88,7 +111,7 @@ def main(
             for iteration, batch in enumerate(test_data_loader, 1):
                 input = Variable(batch[0]).to(device).unsqueeze(1)
                 target = Variable(batch[1]).to(device).unsqueeze(1)
-                
+
                 with torch.cuda.amp.autocast():
                     output = Net(input) * 10
                     loss1 = _loss(output, target)
@@ -110,43 +133,64 @@ def main(
             test_loss = test_loss / len(test_data_loader)
             test_accuracy = test_accuracy / len(test_data_loader)
 
-            writer.add_scalar('train_loss', train_loss, epoch)
-            writer.add_scalar('test_loss', test_loss, epoch)
-            writer.add_scalar('acc', test_accuracy, epoch)
+            writer.add_scalar("train_loss", train_loss, epoch)
+            writer.add_scalar("test_loss", test_loss, epoch)
+            writer.add_scalar("acc", test_accuracy, epoch)
 
             if test_loss < minimum_loss:
                 minimum_loss = test_loss
                 save_network(
-                    epoch, Net, optimizer, test_loss, input_size, patch_size, output_size,
-                    os.path.join(output_folder, 'model.pth')
+                    epoch,
+                    Net,
+                    optimizer,
+                    test_loss,
+                    input_size,
+                    patch_size,
+                    output_size,
+                    os.path.join(output_folder, "model.pth"),
                 )
 
         dist.barrier()
-    
+
     writer.flush()
 
 
 def train(
-        train_datas_or_path, eval_datas_or_path, output_folder, target_label,
-        world_size: int = 1, epochs: int = 30, batch_size: int = 8, lr: float = 0.0001,
+    train_datas_or_path,
+    eval_datas_or_path,
+    output_folder,
+    target_label,
+    world_size: int = 1,
+    epochs: int = 30,
+    batch_size: int = 8,
+    lr: float = 0.0001,
 ):
     find_devices(world_size)
     mp.spawn(
         main,
-        args=(train_datas_or_path, eval_datas_or_path, output_folder, target_label,
-              world_size, epochs, batch_size, lr,),
-        nprocs=world_size, join=True,
+        args=(
+            train_datas_or_path,
+            eval_datas_or_path,
+            output_folder,
+            target_label,
+            world_size,
+            epochs,
+            batch_size,
+            lr,
+        ),
+        nprocs=world_size,
+        join=True,
     )
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train model')
-    req_args = parser.add_argument_group('Required Arguments')
-    req_args.add_argument('-t', dest='train_file', help='', required=True)
-    req_args.add_argument('-e', dest='eval_file', help='', required=True)
-    req_args.add_argument('-o', dest='output_folder', help='', required=True)
-    req_args.add_argument('-l', dest='target_label', help='', required=True)
-    req_args.add_argument('--local_rank', type=int, default=0)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Train model")
+    req_args = parser.add_argument_group("Required Arguments")
+    req_args.add_argument("-t", dest="train_file", help="", required=True)
+    req_args.add_argument("-e", dest="eval_file", help="", required=True)
+    req_args.add_argument("-o", dest="output_folder", help="", required=True)
+    req_args.add_argument("-l", dest="target_label", help="", required=True)
+    req_args.add_argument("--local_rank", type=int, default=0)
 
     args = parser.parse_args(sys.argv[1:])
     train(args.train_file, args.eval_file, args.output_folder, args.target_label)
