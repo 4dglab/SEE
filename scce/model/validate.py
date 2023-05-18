@@ -9,8 +9,10 @@ from scce.model.dataset import Dataset
 from scce.model.net import load_network
 
 
-def evaluate(eval_datas_or_path, model_file, target_label, output_file=None):
-    eval_set = Dataset(eval_datas_or_path, target_label, is_train=False)
+def evaluate(
+    eval_datas_or_path, model_file, target_label, kernel_size: int = 8, output_file=None
+):
+    eval_set = Dataset(eval_datas_or_path, target_label, kernel_size, is_train=False)
     data_loader = data.DataLoader(eval_set, batch_size=1, shuffle=False)
 
     model = load_network(model_file)

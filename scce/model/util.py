@@ -1,5 +1,3 @@
-import logging
-import logging.config
 import os
 
 import numpy as np
@@ -7,35 +5,7 @@ import pynvml
 import torch
 import torch.distributed as dist
 
-
-def set_common_logger(name):
-    # sets up logging for the given name
-    logging.config.dictConfig(
-        {
-            "version": 1,
-            "disable_existing_loggers": False,
-            "formatters": {name: {"format": "%(message)s"}},
-            "handlers": {
-                name: {
-                    "class": "logging.StreamHandler",
-                    "formatter": name,
-                    "level": logging.INFO,
-                }
-            },
-            "loggers": {
-                name: {
-                    "level": logging.INFO,
-                    "handlers": [name],
-                    "propagate": False,
-                }
-            },
-        }
-    )
-
-
-LOGGING_NAME = "scce"
-set_common_logger(LOGGING_NAME)
-LOGGER = logging.getLogger(LOGGING_NAME)
+from scce.utils import LOGGER
 
 
 def find_devices(world_size: int = 1):

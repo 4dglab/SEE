@@ -103,7 +103,7 @@ def define_network(input_size, patch_size, output_size):
 
 
 def save_network(
-    epoch, network, optimizer, loss, input_size, patch_size, output_size, save_path
+    epoch, network, optimizer, loss, input_raw_length, kernel_size, input_size, patch_size, output_size, save_path
 ):
     torch.save(
         {
@@ -111,6 +111,8 @@ def save_network(
             "model_state_dict": network.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "loss": loss,
+            "input_raw_length": input_raw_length,
+            "kernel_size": kernel_size,
             "input_size": input_size,
             "patch_size": patch_size,
             "output_size": output_size,

@@ -1,3 +1,5 @@
+import logging
+import logging.config
 import os
 
 import numpy as np
@@ -27,3 +29,33 @@ def array2mat(array):
         mat[i, i:] = array[a : a + _len - i]
         a += _len - i
     return mat + np.triu(mat, k=1).T
+
+
+def set_common_logger(name):
+    # sets up logging for the given name
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {name: {"format": "%(message)s"}},
+            "handlers": {
+                name: {
+                    "class": "logging.StreamHandler",
+                    "formatter": name,
+                    "level": logging.INFO,
+                }
+            },
+            "loggers": {
+                name: {
+                    "level": logging.INFO,
+                    "handlers": [name],
+                    "propagate": False,
+                }
+            },
+        }
+    )
+
+
+LOGGING_NAME = "scce"
+set_common_logger(LOGGING_NAME)
+LOGGER = logging.getLogger(LOGGING_NAME)

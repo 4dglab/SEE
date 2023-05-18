@@ -6,13 +6,40 @@ import torch
 import torch.utils.data as data
 
 
+def _crack(integer):
+    start = int(np.sqrt(integer))
+    factor = integer / start
+    while int(factor) != factor:
+        start += 1
+        factor = integer / start
+    return int(factor), start
+
+
+class InputDataProcessingHelper:
+    def __init__(self, input_length: int, kernel_size: int) -> None:
+        self.input_length = input_length
+        self.kernel_size = kernel_size
+
+        _len = int(input_length / kernel_size / kernel_size)
+        self.divided_input_length = _len * kernel_size * kernel_size
+        self.patch_size = _crack(_len)
+        self.divided_input_shape = tuple([i * kernel_size for i in self.patch_size])
+
+    def do(self, input: np.array) -> np.array:
+        return input[: self.divided_input_length].reshape(self.divided_input_shape)
+
+
 class Dataset(data.Dataset):
     """
     Reading the training single-cell hic dataset
     """
 
     def __init__(
-        self, datas_or_path: Union[str, list], target_label: str, is_train: bool = False
+        self,
+        datas_or_path: Union[str, list],
+        target_label: str,
+        kernel_size: int,
+        is_train: bool = False,
     ):
         super(Dataset, self).__init__()
 
@@ -22,12 +49,12 @@ class Dataset(data.Dataset):
             if type(datas_or_path) is list
             else np.load(datas_or_path, allow_pickle=True)
         )
-        self._get_data(_datas, target_label)
+        self._get_data(_datas, target_label, kernel_size)
 
         logger = logging.getLogger("base")
         logger.info("Dataset is created.")
 
-    def _get_data(self, datas, target_label):
+    def _get_data(self, datas, target_label, kernel_size):
         """
         [
             {
@@ -42,14 +69,8 @@ class Dataset(data.Dataset):
             ...
         ]
         """
-
-        def _crack(integer):
-            start = int(np.sqrt(integer))
-            factor = integer / start
-            while int(factor) != factor:
-                start += 1
-                factor = integer / start
-            return int(factor), start
+        input_raw_length = datas[0]["scRNA"].shape[0]
+        _helper = InputDataProcessingHelper(input_raw_length, kernel_size)
 
         self._scRNA_data, self._scHiC_data = [], []
         for _data in datas:
@@ -59,16 +80,15 @@ class Dataset(data.Dataset):
                     continue
                 self._scHiC_data.append(_scHiC_data.tolist())
 
-            _scRNA, _scRNA_head = _data["scRNA"].copy(), _data["scRNA_head"]
-            # _where = np.where(_scRNA_head.isin(list( _filter_genes.tolist())))
-            # _where = np.array(list(set(list(range(_scRNA.shape[0]))) - set(_where[0])))
-            # _scRNA[_where] = 0
-            _len = int(_scRNA.shape[0] / 64)
-            _input_size = tuple([i * 8 for i in _crack(_len)])
-            self._scRNA_data.append(np.array(_scRNA[: _len * 64].reshape(_input_size)))
+            self._scRNA_data.append(_helper.do(_data["scRNA"].copy()))
 
         self._scRNA_data = np.array(self._scRNA_data, dtype="float32")
         self._scHiC_data = np.array(self._scHiC_data, dtype="float32")
+
+        self.input_raw_length = input_raw_length
+        self.input_size = _helper.divided_input_shape
+        self.patch_size = _helper.patch_size
+        self.output_size = self._scHiC_data[0].shape[0] if self.is_train else None
 
     def __getitem__(self, index):
         input_tensor = torch.as_tensor(self._scRNA_data[index])

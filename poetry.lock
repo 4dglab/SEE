@@ -201,6 +201,29 @@ files = [
 ]
 
 [[package]]
+name = "captum"
+version = "0.6.0"
+description = "Model interpretability for PyTorch"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "captum-0.6.0-py3-none-any.whl", hash = "sha256:6b157d6c625cc365c5f9630f1380fbb283194001dd77c0f7c07c827bdbe58661"},
+    {file = "captum-0.6.0.tar.gz", hash = "sha256:01bb374622d46b56acd590462757bf2087ed3721dcebf4922db0fa77548d6524"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+torch = ">=1.6"
+
+[package.extras]
+dev = ["annoy", "black (==22.3.0)", "flake8", "flask", "flask-compress", "ipython", "ipywidgets", "jupyter", "mypy (>=0.760)", "parameterized", "pytest", "pytest-cov", "scikit-learn", "sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-katex", "ufmt", "usort (==1.0.2)"]
+insights = ["flask", "flask-compress", "ipython", "ipywidgets", "jupyter"]
+test = ["parameterized", "pytest", "pytest-cov"]
+tutorials = ["flask", "flask-compress", "ipython", "ipywidgets", "jupyter", "torchtext", "torchvision"]
+
+[[package]]
 name = "certifi"
 version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -3765,4 +3788,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "b8e34ef14a1b131b47532e38fd71bdb6a9e17572fafacb84eb1922a0617c5e69"
+content-hash = "18664f02d064aa2d70f406612dfcb729a8af9a1a55a21bbbe44b8114e051f921"

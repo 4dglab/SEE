@@ -32,6 +32,7 @@ def main(
     eval_datas_or_path,
     output_folder,
     target_label,
+    kernel_size: int,
     world_size: int,
     epochs: int,
     batch_size: int,
@@ -45,8 +46,8 @@ def main(
         else None
     )
 
-    train_set = Dataset(train_datas_or_path, target_label, is_train=True)
-    test_set = Dataset(eval_datas_or_path, target_label, is_train=True)
+    train_set = Dataset(train_datas_or_path, target_label, kernel_size, is_train=True)
+    test_set = Dataset(eval_datas_or_path, target_label, kernel_size, is_train=True)
     data_sampler = DistributedSampler(train_set)
     data_loader = torch.utils.data.DataLoader(
         train_set, batch_size=batch_size, shuffle=False, sampler=data_sampler
@@ -56,8 +57,12 @@ def main(
         test_set, batch_size=1, shuffle=False, sampler=test_data_sampler
     )
 
-    input_size, output_size = tuple(train_set[0][0].shape), train_set[0][1].shape[0]
-    patch_size = tuple([int(i / 8) for i in input_size])
+    input_raw_length = train_set.input_raw_length
+    input_size, patch_size, output_size = (
+        train_set.input_size,
+        train_set.patch_size,
+        train_set.output_size,
+    )
     Net = define_network(input_size, patch_size, output_size)
     optimizer = torch.optim.Adam(Net.parameters(), lr=lr)
 
@@ -144,6 +149,8 @@ def main(
                     Net,
                     optimizer,
                     test_loss,
+                    input_raw_length,
+                    kernel_size,
                     input_size,
                     patch_size,
                     output_size,
@@ -160,6 +167,7 @@ def train(
     eval_datas_or_path,
     output_folder,
     target_label,
+    kernel_size: int = 8,
     world_size: int = 1,
     epochs: int = 30,
     batch_size: int = 8,
@@ -173,6 +181,7 @@ def train(
             eval_datas_or_path,
             output_folder,
             target_label,
+            kernel_size,
             world_size,
             epochs,
             batch_size,
