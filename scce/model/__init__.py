@@ -135,7 +135,5 @@ def build(dataset: Dict, target_label: str):
     )
 
 
-def predict(dataset: List[Dict], target_label: str):
-    return evaluate(
-        dataset, os.path.join(".scce", target_label, "model.pth"), target_label
-    )
+def predict(target_label: str, RNA_values: List[np.array]):
+    return evaluate(os.path.join(".scce", target_label, "model.pth"), RNA_values)

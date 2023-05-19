@@ -39,11 +39,9 @@ class Dataset(data.Dataset):
         datas_or_path: Union[str, list],
         target_label: str,
         kernel_size: int,
-        is_train: bool = False,
     ):
         super(Dataset, self).__init__()
 
-        self.is_train = is_train
         _datas = (
             datas_or_path
             if type(datas_or_path) is list
@@ -74,11 +72,10 @@ class Dataset(data.Dataset):
 
         self._scRNA_data, self._scHiC_data = [], []
         for _data in datas:
-            if self.is_train:
-                _scHiC_data = _data["scHiC"][target_label]
-                if np.all(_scHiC_data == 0):
-                    continue
-                self._scHiC_data.append(_scHiC_data.tolist())
+            _scHiC_data = _data["scHiC"][target_label]
+            if np.all(_scHiC_data == 0):
+                continue
+            self._scHiC_data.append(_scHiC_data.tolist())
 
             self._scRNA_data.append(_helper.do(_data["scRNA"].copy()))
 
@@ -88,15 +85,11 @@ class Dataset(data.Dataset):
         self.input_raw_length = input_raw_length
         self.input_size = _helper.divided_input_shape
         self.patch_size = _helper.patch_size
-        self.output_size = self._scHiC_data[0].shape[0] if self.is_train else None
+        self.output_size = self._scHiC_data[0].shape[0]
 
     def __getitem__(self, index):
         input_tensor = torch.as_tensor(self._scRNA_data[index])
-        target_tensor = (
-            torch.as_tensor(self._scHiC_data[index])
-            if self.is_train
-            else torch.as_tensor([])
-        )
+        target_tensor = torch.as_tensor(self._scHiC_data[index])
         return input_tensor, target_tensor
 
     def __len__(self):

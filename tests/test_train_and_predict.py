@@ -28,7 +28,8 @@ def test_train_and_evaluate():
 
     train_dataset, eval_dataset = dataset["train"], dataset["eval"]
     build(dict(train=train_dataset, eval=eval_dataset), target_label=target_label)
-    evaluate = predict(dataset=eval_dataset, target_label=target_label)
+    RNA_values = [data["scRNA"] for data in eval_dataset]
+    evaluate = predict(target_label, RNA_values)
     np.save(FileHelper().evaluate_predict_path, evaluate)
 
 

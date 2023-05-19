@@ -1,43 +1,30 @@
-import argparse
-import sys
+from typing import List
 
 import numpy as np
-import torch.utils.data as data
-from torch.autograd import Variable
+import torch
 
-from scce.model.dataset import Dataset
+from scce.model.dataset import InputDataProcessingHelper
 from scce.model.net import load_network
 
 
-def evaluate(
-    eval_datas_or_path, model_file, target_label, kernel_size: int = 8, output_file=None
-):
-    eval_set = Dataset(eval_datas_or_path, target_label, kernel_size, is_train=False)
-    data_loader = data.DataLoader(eval_set, batch_size=1, shuffle=False)
-
-    model = load_network(model_file)
+def evaluate(model_file, RNA_values: List[np.array]):
+    checkpoint, model = load_network(model_file)
     model.cuda()
     model.eval()
 
+    input_raw_length, kernel_size = (
+        checkpoint["input_raw_length"],
+        checkpoint["kernel_size"],
+    )
+    helper = InputDataProcessingHelper(input_raw_length, kernel_size)
+
     output_data = []
-    for _, batch in enumerate(data_loader, 1):
-        input = Variable(batch[0]).cuda().unsqueeze(1)
+    for RNA_value in RNA_values:
+        input = helper.do(RNA_value.copy())
+        input = torch.Tensor(input).cuda().unsqueeze(0).unsqueeze(0)
+
         output = model(input).detach().cpu().numpy()
         output_data.append(output[0, 0])
 
     output_data = np.array(output_data)
-    if output_file is not None:
-        np.save(output_file, output_data)
     return output_data
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Evaluation Script")
-    req_args = parser.add_argument_group("Required Arguments")
-    req_args.add_argument("-e", dest="eval_file", help="", required=True)
-    req_args.add_argument("-m", dest="model_file", help="", required=True)
-    req_args.add_argument("-l", dest="target_label", help="", required=True)
-    req_args.add_argument("-o", dest="output_file", help="", required=True)
-    args = parser.parse_args(sys.argv[1:])
-
-    evaluate(args.eval_file, args.model_file, args.target_label, args.output_file)

@@ -1,6 +1,4 @@
-import argparse
 import os
-import sys
 
 import torch
 import torch.distributed as dist
@@ -46,8 +44,8 @@ def main(
         else None
     )
 
-    train_set = Dataset(train_datas_or_path, target_label, kernel_size, is_train=True)
-    test_set = Dataset(eval_datas_or_path, target_label, kernel_size, is_train=True)
+    train_set = Dataset(train_datas_or_path, target_label, kernel_size)
+    test_set = Dataset(eval_datas_or_path, target_label, kernel_size)
     data_sampler = DistributedSampler(train_set)
     data_loader = torch.utils.data.DataLoader(
         train_set, batch_size=batch_size, shuffle=False, sampler=data_sampler
@@ -190,16 +188,3 @@ def train(
         nprocs=world_size,
         join=True,
     )
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train model")
-    req_args = parser.add_argument_group("Required Arguments")
-    req_args.add_argument("-t", dest="train_file", help="", required=True)
-    req_args.add_argument("-e", dest="eval_file", help="", required=True)
-    req_args.add_argument("-o", dest="output_folder", help="", required=True)
-    req_args.add_argument("-l", dest="target_label", help="", required=True)
-    req_args.add_argument("--local_rank", type=int, default=0)
-
-    args = parser.parse_args(sys.argv[1:])
-    train(args.train_file, args.eval_file, args.output_folder, args.target_label)

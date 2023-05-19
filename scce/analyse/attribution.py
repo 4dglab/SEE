@@ -13,12 +13,11 @@ from scce.model.net import load_network
 def integrated_gradients(
     model_file, RNA_values: List[np.array], gene_names: List[str]
 ) -> pd.DataFrame:
-    model = load_network(model_file)
+    checkpoint, model = load_network(model_file)
     model.cuda()
     model.eval()
     ig = IntegratedGradients(model)
 
-    checkpoint = torch.load(model_file)
     input_raw_length, kernel_size, input_size, output_size = (
         checkpoint["input_raw_length"],
         checkpoint["kernel_size"],

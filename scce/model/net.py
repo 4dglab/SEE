@@ -103,7 +103,16 @@ def define_network(input_size, patch_size, output_size):
 
 
 def save_network(
-    epoch, network, optimizer, loss, input_raw_length, kernel_size, input_size, patch_size, output_size, save_path
+    epoch,
+    network,
+    optimizer,
+    loss,
+    input_raw_length,
+    kernel_size,
+    input_size,
+    patch_size,
+    output_size,
+    save_path,
 ):
     torch.save(
         {
@@ -128,4 +137,4 @@ def load_network(load_path):
     )
     network = torch.nn.DataParallel(network)
     network.load_state_dict(checkpoint["model_state_dict"])
-    return network
+    return checkpoint, network
