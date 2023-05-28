@@ -6,9 +6,6 @@ import torch.utils.data as data
 
 
 class Dataset(data.Dataset):
-    '''
-    Reading the training single-cell hic dataset
-    '''
     def __init__(self, file_path, gene_name, is_train=False):
         super(Dataset, self).__init__()
 
