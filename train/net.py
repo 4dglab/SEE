@@ -54,7 +54,7 @@ class NET(nn.Module):
 
         decoder_tokens = self.enc_to_dec(encoded_tokens)
 
-        # reapply decoder position embedding to unmasked tokens
+        # reapply decoder position embedding to tokens
 
         indices = repeat(torch.arange(num_patches, device = device), 'd -> b d', b = batch)
         decoder_tokens = decoder_tokens + self.decoder_pos_emb(indices)
