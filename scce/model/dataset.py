@@ -1,9 +1,10 @@
-import logging
 from typing import Union
 
 import numpy as np
 import torch
 import torch.utils.data as data
+
+from scce.utils import LOGGER
 
 
 def _crack(integer):
@@ -49,8 +50,7 @@ class Dataset(data.Dataset):
         )
         self._get_data(_datas, target_label, kernel_size)
 
-        logger = logging.getLogger("base")
-        logger.info("Dataset is created.")
+        LOGGER.info("Dataset is created.")
 
     def _get_data(self, datas, target_label, kernel_size):
         """

@@ -2,8 +2,8 @@
 name = "scce"
 version = "0.1.0"
 description = "a Single-cell method for predicting Chromatin Conformation based on gene Expression"
-license = "MIT"
-authors = ["Ming-Hong Li <lmh0066@outlook.com>"]
+license = "Apache License 2.0"
+authors = ["liminghong.dev <lmh0066@outlook.com>"]
 readme = "README.md"
 repository = "https://github.com/LMH0066/SEE"
 keywords = ["bioinformatics", "deep-learning", "single-cell"]
