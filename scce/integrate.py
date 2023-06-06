@@ -61,7 +61,7 @@ class DataTool:
             marker_genes_index
         )
         self.rna.var["highly_variable"] = False
-        self.rna.var.loc[_index, "highly_variable"] = True
+        self.rna.var.loc[list(_index), "highly_variable"] = True
 
     def get_data(self):
         return self.hic, self.rna
@@ -188,7 +188,7 @@ def glue_embedding(
     hic: anndata.AnnData,
     rna: anndata.AnnData,
     graph: nx.MultiDiGraph,
-    CPU_ONLY: bool = False,
+    CPU_ONLY: bool = True,
 ):
     scglue.config.CPU_ONLY = CPU_ONLY
     scglue.models.configure_dataset(
@@ -236,6 +236,8 @@ def mapping(hic: anndata.AnnData, rna: anndata.AnnData) -> pd.DataFrame:
             _sub.obs[_sub.obs["domain"] == "scHiC"].index,
         ]
         _con = _con[_con.apply(np.sum, axis=1) != 0]
+        if _con.index.empty:
+            continue
         _result = pd.DataFrame(_con.idxmax(1), columns=["scHiC"])
         _result["cell_type"] = cell_type
         _map = pd.concat([_map, _result])

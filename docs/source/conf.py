@@ -6,10 +6,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import toml
+
 project = "SCCE"
 copyright = "2023, liminghong.dev"
 author = "liminghong.dev"
-release = "0.1.0"
+release = toml.load("../../pyproject.toml")["tool"]["poetry"]["version"]
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

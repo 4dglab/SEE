@@ -1,4 +1,5 @@
 import anndata
+import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
@@ -8,9 +9,9 @@ from scce.data import HiCLoader
 def load_hics(folder_path, file_names, resolution, n_jobs=1):
     def _load_hic(folder_path, file_name):
         _hic_loader = HiCLoader(folder_path, resolution)
-        c = _hic_loader.load_hic(file_name)
-        binsize, chromosome_lengths = c.binsize, c.chromosome_lengths
-        contact = _hic_loader.get_contact(c)
+        _c = _hic_loader.load_hic(file_name)
+        binsize, chromosome_lengths = _c.binsize, _c.chromosome_lengths
+        contact = _hic_loader.get_contact(_c)
 
         if binsize != resolution:
             raise ValueError(f"File {file_name} resolution is not {resolution}.")
@@ -36,12 +37,12 @@ def load_hics(folder_path, file_names, resolution, n_jobs=1):
                 for i in range(int(chromosome_lengths[chrom] / binsize) + 1)
             ]
         )
-        _indexs -= set(info.index)
-        info = pd.concat(
-            [info, pd.Series([0] * len(_indexs), index=list(_indexs))]
-        ).sort_index()
+        _indexs = pd.MultiIndex.from_tuples(_indexs - set(info.index))
+        mutual_info = pd.DataFrame(np.zeros(len(_indexs)), index=_indexs)
+        mutual_info.index.rename(["chrom", "start"], inplace=True)
+        info = pd.concat([info, mutual_info]).sort_index()
 
-        return info.to_frame().astype("float16")
+        return info.astype("float16")
 
     joblist = [delayed(_load_hic)(folder_path, file_name) for file_name in file_names]
 

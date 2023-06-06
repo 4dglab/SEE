@@ -5,7 +5,7 @@ This page presents a minimal workflow to get you started in using SCCE. The goal
 ## Step 0: Install SCCE
 
 ```bash
-conda create -n scce python=3.8
+conda create -n scce python=3.8 libffi=3.3
 conda activate scce
 pip install scce
 ```
@@ -13,16 +13,16 @@ pip install scce
 ## Step 1: Prepare the data
 
 The entire workflow requires the following types of data (Following the quotation marks are the recommended data for this workflow):
-1. scHi-C metadata: [Lee2019 metadata(partial)](https://github.com/LMH0066/SEE/tree/master/tests/data/hic/metadata.csv)
+1. scHi-C metadata: [Lee2019 metadata(partial)](../../tests/data/hic/metadata.csv)
 2. scHi-C dataset: [Lee2019](https://salkinstitute.app.box.com/s/fp63a4j36m5k255dhje3zcj5kfuzkyj1/folder/82405563291)
-3. scHi-C pca data: [BandNorm's results(partial)](https://github.com/LMH0066/SEE/tree/master/tests/data/other/hic_pca.csv)
+3. scHi-C PCA data: [BandNorm's results(partial)](../../tests/data/other/hic_pca.csv)
 4. annotation file:
 ```
 wget -c https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz
 gzip -d gencode.v19.annotation.gtf.gz
 ``` 
-5. scRNA metadata: [(partial)](https://github.com/LMH0066/SEE/tree/master/tests/data/rna/metadata.csv)
-6. scRNA expression matrix: [(partial)](https://github.com/LMH0066/SEE/tree/master/tests/data/rna/matrix.csv)
+1. scRNA metadata: [Bakken et al. Human M1 -- 10x Genomics (partial)](../../tests/data/rna/metadata.csv)
+2. scRNA expression matrix: [Bakken et al. Human M1 -- 10x Genomics (partial)](../../tests/data/rna/matrix.csv)
 
 ## Step 2: Construct map
 
@@ -34,8 +34,8 @@ preprocess.hic_process(
     metadata_path,
     hic_folder_path,
     hic_output_path,
-    column_names=dict(id='sample_name', cell_type='cell_type'),
-    cell_types=['Astro', 'Endo', 'ODC', 'OPC'],
+    column_names=dict(id="sample_name", cell_type="cell_type"),
+    cell_types=["Astro", "Endo", "ODC", "OPC"],
     resolution=10000,
     n_jobs=8,
 )
@@ -44,8 +44,8 @@ preprocess.rna_process(
     metadata_path,
     matrix_path,
     rna_output_path,
-    column_names=dict(id='sample_name', cell_type='subclass_label'),
-    cell_types=['Astro', 'Endo', 'Oligo', 'OPC'],
+    column_names=dict(id="sample_name", cell_type="subclass_label"),
+    cell_types=["Astro", "Endo", "Oligo", "OPC"],
 )
 ```
 
@@ -53,26 +53,34 @@ preprocess.rna_process(
 ```python
 from scce import integrate, plot
 
-data_tool = integrate.DataTool(hic_output_path, rna_output_path, cell_types=['Astro', 'Endo', 'Oligo', 'ODC', 'OPC'])
+data_tool = integrate.DataTool(hic_output_path, rna_output_path, cell_types=["Astro", "Endo", "Oligo", "ODC", "OPC"])
 data_tool.add_hic_pca(hic_pca_path)
-data_tool.add_gene_annotation(annotation_path, gtf_by='gene_name')
+data_tool.add_gene_annotation(annotation_path, gtf_by="gene_name")
 
 data_tool.hic_pca()
 data_tool.rna_pca()
 data_tool.rna_highly_variable_genes()
 hic, rna = data_tool.get_data()
 
-hic.var['chromStart'], hic.var['chromEnd'] = hic.var['start'], hic.var['end']
+hic.var["chromStart"], hic.var["chromEnd"] = hic.var["start"], hic.var["end"]
 graph = integrate.generate_graph(hic, rna, resolution=10000)
 integrate.glue_embedding(hic, rna, graph)
 map = integrate.mapping(hic, rna)
 
-hic.write(mapped_hic_path, compression='gzip')
-rna.write(mapped_rna_path, compression='gzip')
+hic.write(mapped_hic_path, compression="gzip")
+rna.write(mapped_rna_path, compression="gzip")
 map.to_csv(mapping_path)
 
-plot.umap(anndata.concat([rna, hic]), dict(color=['cell_type', 'domain']))
+plot.umap(anndata.concat([rna, hic]), dict(color=["cell_type", "domain"]))
 ```
+
+```{figure} _static/integrate_result.png
+:align: center
+
+Integrate Result
+```
+
+<!-- ![integrate result](_static/integrate_result.png) -->
 
 ## Step 3: Train the model
 

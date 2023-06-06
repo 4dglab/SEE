@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scce"
-version = "0.1.0"
+version = "0.1.1"
 description = "a Single-cell method for predicting Chromatin Conformation based on gene Expression"
 license = "Apache License 2.0"
 authors = ["liminghong.dev <lmh0066@outlook.com>"]
@@ -32,6 +32,8 @@ sphinx-autobuild = "^2021.3.14"
 myst-parser = "^1.0.0"
 nbsphinx = "^0.9.2"
 sphinx-rtd-theme = "^1.2.1"
+toml = "^0.10.2"
+
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,22 +1,20 @@
 # SEE
-## Get the code
+## Installation
+```
+conda create -n scce python=3.8 libffi=3.3
+pip install scce
+```
+## Paper Content
+### Get the code
 ```
 git clone https://github.com/LMH0066/SEE.git --depth=1
 ```
-## Installation
-```
-apt-get install bedtools
-conda create -n see python=3.8 libffi=3.3
-pip install poetry
-poetry install
-pip install torch==1.12.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113 # if support GPU
-```
-## Prepare the environment
+### Prepare the environment
 The see environment can be installed via conda:
 ```
 conda env create -f environment.yml
 ```
-## Directory structure
+### Directory structure
 ```
 .
 |-- script                            # Obtain training data through public data
@@ -34,14 +32,14 @@ conda env create -f environment.yml
 |-- environment.yml
 \`-- README.md
 ```
-## Train
-### train
+### Train
+#### train
 ```
 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /folder/to/train_file -e /folder/to/eval_file -o /folder/to/output_folder -g gene_name
 ```
-### validate
+#### validate
 ```
 python validate.py -e /folder/to/eval_file -m /path/to/model -g gene_name -o /folder/to/output_file -s output_size
 ```
-## Analyse
+### Analyse
 All the analysis results in the paper can be found in the code under the 'analyse' folder.
