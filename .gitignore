@@ -3,6 +3,7 @@ __pycache__
 glue
 DPDchrom
 *.png
+docs/build/
 
 # 3DMax
 InputData_in_TupleFormat.txt
