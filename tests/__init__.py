@@ -47,3 +47,7 @@ class FileHelper:
     @property
     def ig_result_path(self):
         return opj(self.output_folder_path, "ig_result.pdf")
+
+    @property
+    def chromatin_remodeling_result_path(self):
+        return opj(self.output_folder_path, "chromatin_remodeling_result.png")
