@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scce"
-version = "0.1.1"
+version = "0.1.2"
 description = "a Single-cell method for predicting Chromatin Conformation based on gene Expression"
 license = "Apache License 2.0"
 authors = ["liminghong.dev <lmh0066@outlook.com>"]
