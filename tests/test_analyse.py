@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from scce.analyse import ig_attribute
+from scce.analyse import ig_attribute, interaction_diffusion
+from scce.plot.base import heatmap
 
 from . import FileHelper
 
@@ -22,3 +23,23 @@ def test_ig_attribute():
     plt.xlabel("genes")
     plt.ylabel("score")
     plt.savefig(FileHelper().ig_result_path, bbox_inches="tight")
+
+
+def test_chromatin_remodeling():
+    evaluate_predict = np.load(FileHelper().evaluate_predict_path, allow_pickle=True)
+
+    x, y, value = interaction_diffusion(
+        hics=evaluate_predict,
+        pseudotimes=np.arange(evaluate_predict.shape[0]),
+        cell_length=0.5,
+    )
+    levels = np.linspace(min(value[~np.isnan(value)]), max(value[~np.isnan(value)]), 15)
+
+    heatmap(
+        x,
+        y,
+        value,
+        levels,
+        cbar_label="pseudo-time",
+        output_path=FileHelper().chromatin_remodeling_result_path,
+    )

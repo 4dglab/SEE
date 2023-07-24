@@ -1,17 +1,15 @@
+import argparse
 import os
 import sys
-import argparse
 
 import torch
 import torch.distributed as dist
-from torch.autograd import Variable
-from torch.utils.data.distributed import DistributedSampler
-
 from dataset import Dataset
 from focalloss import FocalLoss
 from net import define_network
-from util import mkdir, get_logger, init_dist, reduce_tensor
-
+from torch.autograd import Variable
+from torch.utils.data.distributed import DistributedSampler
+from util import get_logger, init_dist, mkdir, reduce_tensor
 
 batch_size = 8
 lr = 0.0001
@@ -50,7 +48,7 @@ def train(train_file, eval_file, output_folder, gene_name):
     # _loss = torch.nn.MSELoss(reduction='mean').to(device)
     _loss = FocalLoss().to(device)
 
-    for epoch in range(0, 30):
+    for epoch in range(0, 20):
         running_loss = 0.0
         Net.train()
         output_max = 0.0

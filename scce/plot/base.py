@@ -82,3 +82,29 @@ def box(data, x=None, y=None, hue=None, xticklabels=None, output_path: str = Non
         plt.savefig(output_path, bbox_inches="tight")
     else:
         plt.show()
+
+
+def heatmap(x, y, value, levels, cbar_label, output_path: str = None):
+    set_plt(figsize=(10, 10))
+    sns.set_theme(style="whitegrid")
+    fig, ax = plt.subplots()
+
+    cs = ax.contourf(x, y, value, levels=levels, cmap=plt.cm.jet)
+    cbar = plt.colorbar(cs)
+    cbar.set_label(cbar_label, rotation=90, fontsize=15)
+
+    ax.xaxis.set_ticks_position("top")
+    ax.invert_yaxis()
+    ax.set_aspect("equal", adjustable="box")
+    plt.tick_params(
+        colors="black",
+        top=True,
+        bottom=False,
+        left=True,
+        labelsize=figure_size["small"],
+    )
+
+    if output_path:
+        plt.savefig(output_path, bbox_inches="tight")
+    else:
+        plt.show()

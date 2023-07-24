@@ -127,7 +127,7 @@ eval_dataset = np.load(dataset_path, allow_pickle=True).item()["eval"]
 target_label = "PDGFRA"
 
 RNA_values = [data["scRNA"] for data in eval_dataset]
-evaluate = predict(target_label, RNA_values)
+evaluate_predict = predict(target_label, RNA_values)
 ```
 
 ## Step 5: Analyse
@@ -145,4 +145,33 @@ RNA_values = [data["scRNA"] for data in eval_dataset if data["cell_type"] == "OP
 gene_names = eval_dataset[0]["scRNA_head"]
 ChRFs_score = ig_attribute(target_label, RNA_values, gene_names)
 ChRFs_score = ChRFs_score.sort_values(by="score", ascending=False)
+```
+
+### calculate chromatin interaction diffusion under chromatin remodeling
+```python
+from scce.analyse import interaction_diffusion
+from scce.plot.base import heatmap
+
+# evaluate_predict: calculated by scce.model.predict (shape: (N, M))
+# pseudotimes: pseudo-time for each sample (shape: (N,))
+x, y, value = interaction_diffusion(
+    hics=evaluate_predict,
+    pseudotimes=pseudotimes,
+    cell_length=0.5,
+)
+levels = np.linspace(min(value[~np.isnan(value)]), max(value[~np.isnan(value)]), 15)
+
+heatmap(
+    x,
+    y,
+    value,
+    levels,
+    cbar_label="pseudo-time",
+)
+```
+
+```{figure} _static/chromatin_remodeling_result.png
+:align: center
+
+Interaction Diffusion
 ```
