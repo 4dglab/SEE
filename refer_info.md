@@ -20,6 +20,7 @@ python validate.py -e /lmh_data/data/sclab/sclab/AD/eval_dataset.npy -m /lmh_dat
 
 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/AD/APP/train_dataset.npy -e /lmh_data/data/sclab/sclab/AD/APP/eval_dataset.npy -o /lmh_data/data/sclab/sclab/AD/APP/tmp -g chr21_27240000_27560000
 python validate.py -e /lmh_data/data/sclab/sclab/AD/eval_dataset.npy -m /lmh_data/data/sclab/sclab/AD/APP/tmp/model_epoch_9.pth -g chr21_27240000_27560000 -o /lmh_data/data/sclab/sclab/AD/APP/evaluate.npy -s 528
+python validate.py -e /lmh_data/data/sclab/sclab/AD/APP/eval_dataset.npy -m /lmh_data/data/sclab/sclab/AD/APP/tmp/model_epoch_9.pth -g chr21_27240000_27560000 -o /lmh_data/data/sclab/sclab/AD/APP/tmp/evaluate.npy -s 528
 
 <!-- mouse -->
 CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 train_model.py -t /lmh_data/data/sclab/sclab/mouse/train_dataset.npy -e /lmh_data/data/sclab/sclab/mouse/eval_dataset.npy -o /lmh_data/data/sclab/sclab/mouse/tmp/Slc1a2 -g Slc1a2
