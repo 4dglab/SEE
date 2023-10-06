@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-output_dir_path = '/lmh_data/data/sclab/sclab/AD/BIN1'
-chrom, chromStart, chromEnd = 'chr2', 127800000, 128000000
+output_dir_path = '/lmh_data/data/sclab/sclab/AD/CLU'
+chrom, chromStart, chromEnd = 'chr8', 27400000, 27500000
 
 root_dir = '/lmh_data/data/sclab'
 threads = 8
