@@ -1,0 +1,37 @@
+3DMAX STRUCTURE BY OLUWATOSIN OLUWADARE ET AL
+ATOM      1   CA MET A1         -4.605  -1.609  -4.042  0.20 10.00
+ATOM      2   CA MET A2         -4.266   3.064  -4.117  0.20 10.00
+ATOM      3   CA MET A3         -0.881   4.832  -5.352  0.20 10.00
+ATOM      4   CA MET A4          3.280   7.554  -1.336  0.20 10.00
+ATOM      5   CA MET A5         -3.646   5.988   1.293  0.20 10.00
+ATOM      6   CA MET A6         -5.467   2.180   1.695  0.20 10.00
+ATOM      7   CA MET A7         -1.061   3.094   4.083  0.20 10.00
+ATOM      8   CA MET A8         -3.000  -1.563   5.818  0.20 10.00
+ATOM      9   CA MET A9          0.898  -3.654   5.610  0.20 10.00
+ATOM     10   CA MET A10         3.922  -5.017   2.353  0.20 10.00
+ATOM     11   CA MET A11         3.584  -5.682  -3.707  0.20 10.00
+ATOM     12   CA MET A12        -1.062  -6.830  -1.309  0.20 10.00
+ATOM     13   CA MET A13        -0.554  -3.365  -5.850  0.20 10.00
+ATOM     14   CA MET A14         2.716   0.547  -6.664  0.20 10.00
+ATOM     15   CA MET A15         4.711   1.683  -3.147  0.20 10.00
+ATOM     16   CA MET A16         5.937  -0.936  -0.207  0.20 10.00
+ATOM     17   CA MET A17         3.678   2.029   2.925  0.20 10.00
+ATOM     18   CA MET A18        -6.265  -5.518   1.277  0.20 10.00
+CONECT    1    2
+CONECT    2    3
+CONECT    3    4
+CONECT    4    5
+CONECT    5    6
+CONECT    6    7
+CONECT    7    8
+CONECT    8    9
+CONECT    9   10
+CONECT   10   11
+CONECT   11   12
+CONECT   12   13
+CONECT   13   14
+CONECT   14   15
+CONECT   15   16
+CONECT   16   17
+CONECT   17   18
+END
