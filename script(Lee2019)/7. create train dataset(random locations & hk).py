@@ -142,7 +142,7 @@ def get_boudary(cool_path, output_file):
 @click.option("--boundary_file", type=str, default="/data/liminghong/sclab/sclab/random_test/boundary.bed", help="Path to bed file.")
 @click.option("--output_folder", type=str, default="/data/liminghong/sclab/sclab/random_test", help="Path to save dataset files.")
 @click.option("--threads", type=int, default=8, help="Number of threads.")
-def generate_dataset(map_file, cools_path, hic_file, rna_file, boundary_file, output_folder, threads):
+def generate_domain_dataset(map_file, cools_path, hic_file, rna_file, boundary_file, output_folder, threads):
     random.seed(0)
 
     map_info = pd.read_csv(map_file, sep="\t", index_col=0)
@@ -259,6 +259,134 @@ def generate_hk_dataset(map_file, cools_path, hic_file, rna_file, annotation_fil
 
     np.save(os.path.join(output_folder, "train_dataset.npy"), train_dataset)
     np.save(os.path.join(output_folder, "eval_dataset.npy"), eval_dataset)
+
+@cli.command(short_help="Generate dataset of variable length.")
+@click.option("--map_file", type=str, default="/data/liminghong/sclab/sclab/map_result.csv", help="Path to map_result.csv.")
+@click.option("--cools_path", type=str, default="/data/liminghong/sclab/Lee2019/Human_single_cell_10kb_cool", help="Path to the folder containing cool files.")
+@click.option("--hic_file", type=str, default="/data/liminghong/sclab/sclab/hic_result.h5ad", help="Path to hic_result.h5ad.")
+@click.option("--rna_file", type=str, default="/data/liminghong/sclab/sclab/rna_result.h5ad", help="Path to rna_result.h5ad.")
+@click.option("--output_folder", type=str, default="/data/liminghong/sclab/sclab/random_test/variable_length", help="Path to save dataset files.")
+@click.option("--threads", type=int, default=8, help="Number of threads.")
+def generate_variable_length_dataset(map_file, cools_path, hic_file, rna_file, output_folder, threads):
+    random.seed(0)
+
+    map_info = pd.read_csv(map_file, sep="\t", index_col=0)
+    hic = anndata.read_h5ad(hic_file)
+    rna = anndata.read_h5ad(rna_file)
+
+    with Pool(threads) as p:
+        clrs = dict(p.map(get_cooler, [(hic_name, cools_path) for hic_name in hic.obs_names]))
+    
+    bins = next(iter(clrs.values())).bins()[:]
+    locations = []
+    for length in range(50, 501, 50):
+        _num = 0
+        while _num < 5:
+            index = random.sample(bins.index.tolist(), 1)[0]
+            if bins.iloc[index].chrom != bins.iloc[index+length].chrom:
+                continue
+            locations.append((
+                bins.iloc[index].chrom,
+                bins.iloc[index].start,
+                bins.iloc[index+length].start
+            ))
+            _num += 1
+
+    contacts = catch_locations(clrs, hic.obs_names, locations, threads)
+
+    _dataset = []
+    for scRNA, row in tqdm(map_info.iterrows(), total = map_info.shape[0]):
+        _dataset.append({
+            "scRNA": rna[scRNA, :].layers["counts"][0].astype(np.int32),
+            "scRNA_head": rna.var_names,
+            "scHiC": contacts.loc[row["scHiC"]].to_dict(),
+            "cell_type": row["cell_type"],
+            "identity": "truth",
+        })
+
+    hic_corr, rna_corr = get_corr_matrix(map_info, hic, rna, contacts)
+
+    cell_type_count = map_info.groupby("cell_type").count()
+    for cell_type, row in cell_type_count.iterrows():
+        for i in range(min(cell_type_count.max()[0] - row["scHiC"], int(row["scHiC"]/2))):
+            random_index = random.randint(0, row["scHiC"] - 1)
+            _case = map_info[map_info["cell_type"]==cell_type].iloc[random_index]
+            best_rna, best_hic = find_best_RNA(rna, rna_corr, _case.name, cell_type), find_best_HiC(contacts, hic_corr, _case["scHiC"], cell_type)
+            
+            _dataset.append({
+                "scRNA": best_rna,
+                "scRNA_head": rna.var_names,
+                "scHiC": best_hic.loc[0].to_dict(),
+                "cell_type": cell_type,
+                "identity": "fake",
+            })
+
+    # Randomly generate train dataset and test dataset
+    _indexs = random.sample(range(0, len(_dataset)), int(len(_dataset)*0.1))
+    eval_dataset = [_dataset[_index] for _index in _indexs]
+    _indexs = list(set(range(0, len(_dataset))) - set(_indexs))
+    train_dataset = [_dataset[_index] for _index in _indexs]
+
+    np.save(os.path.join(output_folder, "train_dataset.npy"), train_dataset)
+    np.save(os.path.join(output_folder, "eval_dataset.npy"), eval_dataset)
+
+
+@cli.command(short_help="Generate dataset of variable length.")
+@click.option("--map_file", type=str, default="/data/liminghong/sclab/sclab/map_result.csv", help="Path to map_result.csv.")
+@click.option("--cools_path", type=str, default="/data/liminghong/sclab/Lee2019/Human_single_cell_10kb_cool", help="Path to the folder containing cool files.")
+@click.option("--hic_file", type=str, default="/data/liminghong/sclab/sclab/hic_result.h5ad", help="Path to hic_result.h5ad.")
+@click.option("--rna_file", type=str, default="/data/liminghong/sclab/sclab/rna_result.h5ad", help="Path to rna_result.h5ad.")
+@click.option("--gene_name", type=str, default="PIP4K2A")
+@click.option("--annotation_file", type=str, default="/data/liminghong/sclab/public/gencode.v19.annotation.gtf", help="Path to gtf file.")
+@click.option("--output_folder", type=str, default="/data/liminghong/sclab/sclab/random_test/variable_length_around_gene", help="Path to save dataset files.")
+@click.option("--threads", type=int, default=8, help="Number of threads.")
+def generate_variable_length_around_gene_dataset(map_file, cools_path, hic_file, rna_file, gene_name, annotation_file, output_folder, threads):
+    random.seed(0)
+
+    map_info = pd.read_csv(map_file, sep="\t", index_col=0)
+    hic = anndata.read_h5ad(hic_file)
+    rna = anndata.read_h5ad(rna_file)
+    v19_anno = pd.read_csv(
+        annotation_file,
+        header=None, sep='\t', skiprows=[i for i in range(5)], usecols=[0, 2, 3, 4, 6, 8],
+        names=['chrom', 'type', 'start', 'end', 'strand', 'info']
+    )
+    v19_anno["gene_name"] = v19_anno["info"].str.extract(r'(gene_name ")(\w*)')[1]
+    v19_anno = v19_anno[(v19_anno["type"]=="gene") & (v19_anno["gene_name"]==gene_name)]
+
+    with Pool(threads) as p:
+        clrs = dict(p.map(get_cooler, [(hic_name, cools_path) for hic_name in hic.obs_names]))
+    
+    bins = next(iter(clrs.values())).bins()[:]
+    locations = []
+    for length in range(0, 201, 40):
+        _chrom, _start, _end = v19_anno["chrom"].item(), v19_anno["start"].item(), v19_anno["end"].item()
+        _start -= length * 10000
+        _end += length * 10000
+        if _start < 0 or _end > bins[bins["chrom"]==_chrom]["start"].max():
+            continue
+        locations.append((_chrom, _start, _end))
+
+    contacts = catch_locations(clrs, hic.obs_names, locations, threads)
+
+    _dataset = []
+    for scRNA, row in tqdm(map_info.iterrows(), total = map_info.shape[0]):
+        _dataset.append({
+            "scRNA": rna[scRNA, :].layers["counts"][0].astype(np.int32),
+            "scRNA_head": rna.var_names,
+            "scHiC": contacts.loc[row["scHiC"]].to_dict(),
+            "cell_type": row["cell_type"],
+            "identity": "truth",
+        })
+
+    # Randomly generate train dataset and test dataset
+    _indexs = random.sample(range(0, len(_dataset)), int(len(_dataset)*0.1))
+    eval_dataset = [_dataset[_index] for _index in _indexs]
+    _indexs = list(set(range(0, len(_dataset))) - set(_indexs))
+    train_dataset = [_dataset[_index] for _index in _indexs]
+
+    np.save(os.path.join(output_folder, gene_name, "train_dataset.npy"), train_dataset)
+    np.save(os.path.join(output_folder, gene_name, "eval_dataset.npy"), eval_dataset)
 
 if __name__ == "__main__":
     cli()

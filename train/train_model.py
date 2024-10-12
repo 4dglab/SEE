@@ -12,7 +12,6 @@ from torch.utils.data.distributed import DistributedSampler
 from util import get_logger, init_dist, mkdir, reduce_tensor
 
 batch_size = 8
-lr = 0.0001
 
 
 def get_corr(fake_Y, Y):
@@ -23,7 +22,7 @@ def get_corr(fake_Y, Y):
     return corr
 
 
-def train(train_file, eval_file, output_folder, gene_name):
+def train(train_file, eval_file, output_folder, gene_name, lr):
     mkdir(output_folder)
     local_rank, device = init_dist()
     logger = get_logger(os.path.join(output_folder, 'exp.log'))
@@ -130,7 +129,8 @@ if __name__ == '__main__':
     req_args.add_argument('-e', dest='eval_file', help='', required=True)
     req_args.add_argument('-o', dest='output_folder', help='', required=True)
     req_args.add_argument('-g', dest='gene_name', help='', required=True)
+    req_args.add_argument('-l', dest='lr', type=float, default=0.0001)
     req_args.add_argument('--local_rank', type=int, default=0)
 
     args = parser.parse_args(sys.argv[1:])
-    train(args.train_file, args.eval_file, args.output_folder, args.gene_name)
+    train(args.train_file, args.eval_file, args.output_folder, args.gene_name, args.lr)
