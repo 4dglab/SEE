@@ -1,4 +1,9 @@
 # SEE
+SEE is a method for predicting the dynamics of chromatin conformation based on single-cell gene expression.
+## Usage
+The input of SEE is scRNA-seq data for all genes, and the output is scHi-C information for **a single specific region**.  
+For an efficient balance between computational load and accuracy, we recommend using SEE at the megabase scale or smaller.  
+The entire framework is divided into preprocessing, integration, training, and analysis. Only the training stage requires users to specify the chromatin region, using one parameter.
 ## Installation
 ```
 conda create -n scce python=3.8 libffi=3.3
