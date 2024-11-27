@@ -10,6 +10,7 @@
 :maxdepth: 2
 
 quick_start.md
+genomewide_evaluations.md
 api.md
 ```
 

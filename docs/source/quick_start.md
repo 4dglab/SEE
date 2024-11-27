@@ -21,8 +21,8 @@ The entire workflow requires the following types of data (Following the quotatio
 wget -c https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz
 gzip -d gencode.v19.annotation.gtf.gz
 ``` 
-1. scRNA metadata: [Bakken et al. Human M1 -- 10x Genomics (partial)](../../tests/data/rna/metadata.csv)
-2. scRNA expression matrix: [Bakken et al. Human M1 -- 10x Genomics (partial)](../../tests/data/rna/matrix.csv)
+5. scRNA metadata: [Bakken et al. Human M1 -- 10x Genomics (partial)](../../tests/data/rna/metadata.csv)
+6. scRNA expression matrix: [Bakken et al. Human M1 -- 10x Genomics (partial)](../../tests/data/rna/matrix.csv)
 
 ## Step 2: Construct map
 
