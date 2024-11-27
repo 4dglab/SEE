@@ -18,7 +18,7 @@ build:
       - poetry config virtualenvs.create false
     post_install:
       # Install dependencies
-      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH poetry install --with docs
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH poetry install --with doc
 
 sphinx:
    configuration: docs/source/conf.py
