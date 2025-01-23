@@ -48,3 +48,17 @@ python validate.py -e /folder/to/eval_file -m /path/to/model -g gene_name -o /fo
 ```
 ### Analyse
 All the analysis results in the paper can be found in the code under the 'analyse' folder.
+## Cite
+Cite our paper by
+```
+@article{li2025see,
+    author = {Li, Minghong and Yang, Yurong and Wu, Rucheng and Gong, Haiyan and Yuan, Zan and Wang, Jixin and Long, Erping and Zhang, Xiaotong and Chen, Yang},
+    title = {SEE: A Method for Predicting the Dynamics of Chromatin Conformation Based on Single-Cell Gene Expression},
+    journal = {Advanced Science},
+    pages = {2406413},
+    year = {2025},
+    doi = {https://doi.org/10.1002/advs.202406413},
+    url = {https://advanced.onlinelibrary.wiley.com/doi/abs/10.1002/advs.202406413},
+    eprint = {https://advanced.onlinelibrary.wiley.com/doi/pdf/10.1002/advs.202406413}
+}
+```
